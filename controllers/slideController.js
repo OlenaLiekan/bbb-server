@@ -1,19 +1,40 @@
-const uuid = require('uuid');
-const path = require('path');
 const { Slide } = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { upload } = require('../cloudinary');
 
 class SlideController {
   async create(req, res, next) {
     try {
       const { img } = req.files;
-      let fileName = uuid.v4() + '.jpg';
-      img.mv(path.resolve(__dirname, '..', 'static', fileName));
-      const slide = await Slide.create({ img: fileName });
+      const { url } = req.body;
+      const cloudFile = await upload(img.tempFilePath);
+      const fileName = cloudFile.secure_url.split('/').pop();
+      const slide = await Slide.create({ img: fileName, url });
       return res.json(slide);
     } catch (e) {
       next(ApiError.badRequest(e.message));
     }
+  }
+
+  async update(req, res) {
+    const { id } = req.params;
+    let { url } = req.body;
+
+    const { img } = req.files ? req.files : '';
+
+    const options = { where: { id: id } };
+    let props = {};
+
+    if (url) {
+      props = { ...props, url };
+    }
+    if (img) {
+      const cloudFile = await upload(img.tempFilePath);
+      const fileName = cloudFile.secure_url.split('/').pop();
+      props = { ...props, img: fileName };
+    }
+    const slide = await Slide.update(props, options);
+    return res.json(slide);
   }
 
   async destroy(req, res) {

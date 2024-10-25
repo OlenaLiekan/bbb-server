@@ -1,5 +1,4 @@
 const sequelize = require('../db');
-
 const { DataTypes } = require('sequelize');
 
 const User = sequelize.define('user', {
@@ -24,6 +23,9 @@ const UserOrder = sequelize.define('user_order', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   quantity: { type: DataTypes.INTEGER, allowNull: false },
   sum: { type: DataTypes.INTEGER, allowNull: false },
+  deliveryPrice: { type: DataTypes.STRING, allowNull: false },
+  orderNumber: { type: DataTypes.STRING, allowNull: false },
+  userComment: { type: DataTypes.STRING, allowNull: true },
 });
 
 const UserAddress = sequelize.define('user_address', {
@@ -38,7 +40,7 @@ const UserAddress = sequelize.define('user_address', {
   city: { type: DataTypes.STRING, allowNull: false },
   country: { type: DataTypes.STRING, allowNull: false },
   region: { type: DataTypes.STRING, allowNull: false },
-  postalCode: { type: DataTypes.INTEGER, allowNull: false },
+  postalCode: { type: DataTypes.STRING, allowNull: false },
   mainAddress: { type: DataTypes.BOOLEAN, allowNull: false },
 });
 
@@ -57,6 +59,10 @@ const Product = sequelize.define('product', {
   rating: { type: DataTypes.NUMBER, defaultValue: 0 },
   img: { type: DataTypes.STRING, allowNull: false },
   isLashes: { type: DataTypes.BOOLEAN, allowNull: false },
+  available: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+  topProduct: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
+  isPromo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 });
 
 const ProductSlide = sequelize.define('product_slide', {
@@ -105,6 +111,16 @@ const ProductText = sequelize.define('product_text', {
   text: { type: DataTypes.TEXT, allowNull: false },
 });
 
+const ProductApplying = sequelize.define('product_applying', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  text: { type: DataTypes.TEXT, allowNull: true },
+});
+
+const ProductCompound = sequelize.define('product_compound', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  text: { type: DataTypes.TEXT, allowNull: true },
+});
+
 const TypeBrand = sequelize.define('type_brand', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 });
@@ -112,7 +128,47 @@ const TypeBrand = sequelize.define('type_brand', {
 const Slide = sequelize.define('slide', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   img: { type: DataTypes.STRING, allowNull: false },
+  url: { type: DataTypes.STRING, allowNull: true },
 });
+
+const Logo = sequelize.define('logo', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  img: { type: DataTypes.STRING, allowNull: false },
+  logoName: { type: DataTypes.STRING, allowNull: true },
+});
+
+const DeliveryPrice = sequelize.define('delivery', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  price: { type: DataTypes.STRING, allowNull: false },
+  requiredSum: { type: DataTypes.STRING, allowNull: true },
+  type: { type: DataTypes.STRING, allowNull: false },
+});
+
+const PaymentDetails = sequelize.define('payment', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  account: { type: DataTypes.STRING, allowNull: false },
+  recipient: { type: DataTypes.STRING, allowNull: false },
+  available: { type: DataTypes.BOOLEAN, allowNull: false },
+  type: { type: DataTypes.STRING, allowNull: false },
+});
+
+const PaymentInformation = sequelize.define('PaymentInformation', {
+  transactionID: {type: DataTypes.STRING, primaryKey: true, allowNull: false},
+  transactionSignature: {type: DataTypes.STRING, allowNull: false},
+  orderID: {type: DataTypes.STRING, allowNull: false},
+  customerName: {type: DataTypes.STRING, allowNull: false},
+  customerEmail: {type: DataTypes.STRING, allowNull: false},
+  amount: {type: DataTypes.DOUBLE, allowNull: false},
+  paymentMethod: {type: DataTypes.STRING, allowNull: true},
+  paymentStatus: {type: DataTypes.STRING, allowNull: true},
+  startTime: {type: DataTypes.DATE, allowNull: false},
+  phoneNumber: {type: DataTypes.STRING, allowNull: true},
+  reference: {type: DataTypes.STRING, allowNull: true},
+  entity: {type: DataTypes.STRING, allowNull: true}
+}, {
+  timestamps: false
+});
+
 
 User.hasOne(Basket);
 Basket.belongsTo(User);
@@ -138,6 +194,9 @@ BasketProduct.belongsTo(Basket);
 Category.hasMany(Type);
 Type.belongsTo(Category);
 
+Category.hasMany(Product);
+Product.belongsTo(Category);
+
 Type.hasMany(Product);
 Product.belongsTo(Type);
 
@@ -162,6 +221,12 @@ ProductSlide.belongsTo(Product);
 Product.hasMany(ProductText, { as: 'text' });
 ProductText.belongsTo(Product);
 
+Product.hasMany(ProductCompound, { as: 'compound' });
+ProductCompound.belongsTo(Product);
+
+Product.hasMany(ProductApplying, { as: 'applying' });
+ProductApplying.belongsTo(Product);
+
 Type.belongsToMany(Brand, { through: TypeBrand });
 Brand.belongsToMany(Type, { through: TypeBrand });
 
@@ -182,5 +247,11 @@ module.exports = {
   ProductInfo,
   ProductSlide,
   Slide,
+  Logo,
   ProductText,
+  ProductCompound,
+  ProductApplying,
+  PaymentDetails,
+  DeliveryPrice,
+  PaymentInformation
 };

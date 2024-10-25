@@ -2,10 +2,14 @@ const { Rating } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
 class RatingController {
-  async create(req, res) {
-    let { name, userId, userName, productId } = req.body;
-    const rating = await Rating.create({ name, userId, userName, productId });
-    return res.json(rating);
+  async create(req, res, next) {
+    try {
+      let { name, userId, userName, productId } = req.body;
+      const rating = await Rating.create({ name, userId, userName, productId });
+      return res.json(rating);
+    } catch (e) {
+      next(ApiError.badRequest(e.message));
+    }
   }
 
   async getAll(req, res) {

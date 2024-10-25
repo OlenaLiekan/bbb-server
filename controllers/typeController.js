@@ -1,16 +1,19 @@
 const { Type } = require('../models/models');
 const ApiError = require('../error/ApiError');
-const uuid = require('uuid');
-const path = require('path');
+const { upload } = require('../cloudinary');
 
 class TypeController {
   async create(req, res) {
-    let { name, categoryId } = req.body;
-    const { img } = req.files;
-    let fileName = uuid.v4() + '.jpg';
-    img.mv(path.resolve(__dirname, '..', 'static', fileName));
-    const type = await Type.create({ name, categoryId, img: fileName });
-    return res.json(type);
+    try {
+      let { name, categoryId } = req.body;
+      const { img } = req.files;
+      const cloudFile = await upload(img.tempFilePath);
+      const fileName = cloudFile.secure_url.split('/').pop();
+      const type = await Type.create({ name, categoryId, img: fileName });
+      return res.json(type);
+    } catch (e) {
+      next(ApiError.badRequest(e.message));
+    }
   }
 
   async destroy(req, res) {
@@ -22,13 +25,28 @@ class TypeController {
   }
 
   async update(req, res) {
-    const typeId = req.params.id;
+    const { id } = req.params;
     let { name, categoryId } = req.body;
-    const { img } = req.files;
-    let fileName = uuid.v4() + '.jpg';
-    img.mv(path.resolve(__dirname, '..', 'static', fileName));
-    const options = { where: { id: typeId } };
-    const type = await Type.update({ name, categoryId, img: fileName }, options);
+    const { img } = req.files ? req.files : '';
+
+    let props = {};
+    const options = { where: { id: id } };
+
+    if (name) {
+      props = { ...props, name };
+    }
+
+    if (categoryId) {
+      props = { ...props, categoryId };
+    }
+
+    if (img) {
+      const cloudFile = await upload(img.tempFilePath);
+      const fileName = cloudFile.secure_url.split('/').pop();
+      props = { ...props, img: fileName };
+    }
+
+    const type = await Type.update(props, options);
     return res.json(type);
   }
 

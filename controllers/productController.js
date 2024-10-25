@@ -1,41 +1,90 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-const uuid = require('uuid');
-const path = require('path');
-const { Product, ProductInfo, ProductSlide, ProductText } = require('../models/models');
+const {
+  Product,
+  ProductInfo,
+  ProductSlide,
+  ProductText,
+  ProductApplying,
+  ProductCompound,
+} = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { upload } = require('../cloudinary');
 
 class ProductController {
   async create(req, res, next) {
     try {
-      let { name, code, price, brandId, typeId, info, isLashes, text } = req.body;
+      let {
+        name,
+        code,
+        price,
+        discountPrice,
+        isPromo,
+        categoryId,
+        brandId,
+        typeId,
+        info,
+        isLashes,
+        available,
+        topProduct,
+        text,
+        compound,
+        applying,
+      } = req.body;
+      if (!req.files) return res.send('Please upload an image');
       const { img } = req.files;
-      const { slide } = req.files;
-      let fileName = uuid.v4() + '.jpg';
-      let slideName = uuid.v4() + '.jpg';
-      img.mv(path.resolve(__dirname, '..', 'static', fileName));
-      if (slide.length > 1) {
-        slide.forEach((img, i) => img.mv(path.resolve(__dirname, '..', 'static', i + slideName)));
-      } else {
-        slide.mv(path.resolve(__dirname, '..', 'static', slideName));
+      let { slide } = req.files ? req.files : '';
+      const fileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!fileTypes.includes(img.mimetype)) {
+        return res.send('Image formats supported: JPG, PNG, JPEG');
+      }
+      const cloudFile = await upload(img.tempFilePath);
+      const fileName = cloudFile.secure_url.split('/').pop();
+      let slideName = '';
+      let slideNames = [];
+
+      if (slide) {
+        if (slide.length > 1) {
+          for (let image of slide) {
+            const resFile = await upload(image.tempFilePath);
+            const slideName = resFile.secure_url.split('/').pop();
+            slideNames = [...slideNames, slideName];
+          }
+        } else {
+          const slideFile = await upload(slide.tempFilePath);
+          slideName = slideFile.secure_url.split('/').pop();
+        }
       }
 
       const product = await Product.create({
         name,
         code,
         price,
+        discountPrice,
+        isPromo,
+        categoryId,
         brandId,
         typeId,
         img: fileName,
         isLashes,
+        available,
+        topProduct,
       });
 
-      if (text) {
-        ProductText.create({
-          text: text,
-          productId: product.id,
-        });
-      }
+      ProductText.create({
+        text: text,
+        productId: product.id,
+      });
+
+      ProductApplying.create({
+        text: applying,
+        productId: product.id,
+      });
+
+      ProductCompound.create({
+        text: compound,
+        productId: product.id,
+      });
 
       if (info) {
         info = JSON.parse(info);
@@ -48,18 +97,20 @@ class ProductController {
         );
       }
 
-      if (slide.length > 1) {
-        slide.forEach((img, i) => {
+      if (slide) {
+        if (slide.length > 1) {
+          slideNames.forEach(img => {
+            ProductSlide.create({
+              slideImg: img,
+              productId: product.id,
+            });
+          });
+        } else {
           ProductSlide.create({
-            slideImg: i + slideName,
+            slideImg: slideName,
             productId: product.id,
           });
-        });
-      } else {
-        ProductSlide.create({
-          slideImg: slideName,
-          productId: product.id,
-        });
+        }
       }
 
       return res.json(product);
@@ -70,6 +121,7 @@ class ProductController {
 
   async destroy(req, res) {
     const { id } = req.query;
+
     const product = await Product.destroy({
       where: { id },
     });
@@ -78,24 +130,48 @@ class ProductController {
 
   async update(req, res, next) {
     const { id } = req.params;
-    let { name, rating, code, price, brandId, typeId, info, isLashes, text, deletedSlideId } =
-      req.body;
+    let {
+      name,
+      rating,
+      code,
+      price,
+      discountPrice,
+      isPromo,
+      categoryId,
+      brandId,
+      typeId,
+      info,
+      isLashes,
+      text,
+      applying,
+      compound,
+      deletedSlideId,
+      available,
+      topProduct,
+    } = req.body;
 
     const { img } = req.files ? req.files : '';
     const { slide } = req.files ? req.files : '';
 
-    let fileName = uuid.v4() + '.jpg';
-    let slideName = uuid.v4() + '.jpg';
+    let fileName = '';
+    let slideNames = [];
+    let slideName = '';
 
     if (img) {
-      img.mv(path.resolve(__dirname, '..', 'static', fileName));
+      const cloudFile = await upload(img.tempFilePath);
+      fileName = cloudFile.secure_url.split('/').pop();
     }
 
     if (slide) {
       if (slide.length > 1) {
-        slide.forEach((img, i) => img.mv(path.resolve(__dirname, '..', 'static', i + slideName)));
+        for (let image of slide) {
+          const resFile = await upload(image.tempFilePath);
+          const slideName = resFile.secure_url.split('/').pop();
+          slideNames = [...slideNames, slideName];
+        }
       } else {
-        slide.mv(path.resolve(__dirname, '..', 'static', slideName));
+        const slideFile = await upload(slide.tempFilePath);
+        slideName = slideFile.secure_url.split('/').pop();
       }
     }
 
@@ -114,6 +190,9 @@ class ProductController {
     if (price) {
       props = { ...props, price };
     }
+    if (categoryId) {
+      props = { ...props, categoryId };
+    }
     if (brandId) {
       props = { ...props, brandId };
     }
@@ -123,8 +202,9 @@ class ProductController {
     if (rating) {
       props = { ...props, rating };
     }
+    props = { ...props, discountPrice };
 
-    props = { ...props, isLashes };
+    props = { ...props, isLashes, available, topProduct, isPromo };
 
     const product = await Product.update(props, options);
 
@@ -134,6 +214,28 @@ class ProductController {
       ProductText.update(
         {
           text: text,
+        },
+        textOps
+      );
+    }
+
+    if (applying) {
+      const productId = req.params.id;
+      const textOps = { where: { productId: productId } };
+      ProductApplying.update(
+        {
+          text: applying,
+        },
+        textOps
+      );
+    }
+
+    if (compound) {
+      const productId = req.params.id;
+      const textOps = { where: { productId: productId } };
+      ProductCompound.update(
+        {
+          text: compound,
         },
         textOps
       );
@@ -164,9 +266,9 @@ class ProductController {
     if (slide) {
       const productId = req.params.id;
       if (slide.length > 1) {
-        slide.forEach((img, index) => {
+        slideNames.forEach(img => {
           ProductSlide.create({
-            slideImg: index + slideName,
+            slideImg: img,
             productId: productId,
           });
         });
@@ -182,7 +284,18 @@ class ProductController {
   }
 
   async getAll(req, res) {
-    const { brandId, typeId, limit = 12, page = 1, rating, name, price } = req.query;
+    const {
+      categoryId,
+      brandId,
+      typeId,
+      limit = 24,
+      page = 1,
+      rating,
+      name,
+      price,
+      discountPrice,
+      isPromo,
+    } = req.query;
     const offset = page * limit - limit;
 
     let sort = req.query.sort ? req.query.sort : 'rating';
@@ -198,8 +311,14 @@ class ProductController {
         { model: ProductInfo, as: 'info' },
         { model: ProductSlide, as: 'slide' },
         { model: ProductText, as: 'text' },
+        { model: ProductApplying, as: 'applying' },
+        { model: ProductCompound, as: 'compound' },
       ],
     };
+
+    if (categoryId) {
+      options.where = { ...options.where, categoryId };
+    }
 
     if (brandId) {
       options.where = { ...options.where, brandId };
@@ -221,6 +340,14 @@ class ProductController {
       options.where = { ...options.where, price };
     }
 
+    if (discountPrice) {
+      options.where = { ...options.where, discountPrice };
+    }
+
+    if (isPromo) {
+      options.where = { ...options.where, isPromo };
+    }
+
     const products = await Product.findAndCountAll(options);
     products.sort = req.query.sort;
     return res.json(products);
@@ -235,6 +362,8 @@ class ProductController {
           { model: ProductInfo, as: 'info' },
           { model: ProductSlide, as: 'slide' },
           { model: ProductText, as: 'text' },
+          { model: ProductApplying, as: 'applying' },
+          { model: ProductCompound, as: 'compound' },
         ],
       });
       return res.json(product);

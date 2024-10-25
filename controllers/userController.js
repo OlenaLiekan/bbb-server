@@ -4,7 +4,9 @@ const jwt = require('jsonwebtoken');
 const { User, Basket, UserOrder, OrderItem, UserAddress } = require('../models/models');
 
 const generateJwt = (id, email, role) => {
-  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, { expiresIn: '24h' });
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
+    expiresIn: '24h',
+  });
 };
 
 class UserController {
@@ -60,7 +62,7 @@ class UserController {
   }
 
   async getAll(req, res) {
-    const { role, email } = req.query;
+    const { role } = req.query;
     let options = {
       where: {},
       include: [
@@ -69,23 +71,16 @@ class UserController {
           as: 'order',
           include: [{ model: OrderItem, as: 'item' }],
         },
-        {
-          model: UserAddress,
-          as: 'address',
-        },
       ],
     };
     if (role) {
       options.where = { ...options.where, role };
     }
-    if (email) {
-      options.where = { ...options.where, email };
-    }
     const users = await User.findAll(options);
     return res.json(users);
   }
 
-  async getOne(req, res) {
+  async getById(req, res) {
     const { id } = req.params;
     let options = {
       where: {},
@@ -99,6 +94,25 @@ class UserController {
     };
     if (id) {
       options.where = { ...options.where, id };
+    }
+    const user = await User.findOne(options);
+    return res.json(user);
+  }
+
+  async getOne(req, res) {
+    const { email } = req.query;
+    let options = {
+      where: {},
+      include: [
+        { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
+        {
+          model: UserAddress,
+          as: 'address',
+        },
+      ],
+    };
+    if (email) {
+      options.where = { ...options.where, email };
     }
     const user = await User.findOne(options);
     return res.json(user);
@@ -118,11 +132,21 @@ class UserController {
       userId,
       quantity,
       sum,
+      deliveryPrice,
+      orderNumber,
       items,
       firstName,
+      upFirstName,
+      crFirstName,
       lastName,
+      upLastName,
+      crLastName,
       email,
+      upEmail,
+      crEmail,
       phone,
+      upPhone,
+      crPhone,
       password,
       company,
       firstAddress,
@@ -131,6 +155,7 @@ class UserController {
       country,
       region,
       postalCode,
+      userComment,
       mainAddress,
       deletedAddressId,
       updatedAddressId,
@@ -167,9 +192,12 @@ class UserController {
 
     if (userId && items) {
       const userOrder = await UserOrder.create({
-        userId: userId,
-        quantity: quantity,
-        sum: sum,
+        userId,
+        quantity,
+        deliveryPrice,
+        sum,
+        orderNumber,
+        userComment,
       });
       items = JSON.parse(items);
       items.forEach(item => {
@@ -207,10 +235,10 @@ class UserController {
       secondAddress = secondAddress ? secondAddress : '';
       UserAddress.create({
         userId,
-        firstName,
-        lastName,
-        email,
-        phone,
+        firstName: crFirstName,
+        lastName: crLastName,
+        email: crEmail,
+        phone: crPhone,
         company: company,
         firstAddress,
         secondAddress: secondAddress,
@@ -234,17 +262,17 @@ class UserController {
       };
       let props = {};
 
-      if (firstName) {
-        props = { ...props, firstName };
+      if (upFirstName) {
+        props = { ...props, firstName: upFirstName };
       }
-      if (lastName) {
-        props = { ...props, lastName };
+      if (upLastName) {
+        props = { ...props, lastName: upLastName };
       }
-      if (email) {
-        props = { ...props, email };
+      if (upEmail) {
+        props = { ...props, email: upEmail };
       }
-      if (phone) {
-        props = { ...props, phone };
+      if (upPhone) {
+        props = { ...props, phone: upPhone };
       }
       if (company) {
         props = { ...props, company };
