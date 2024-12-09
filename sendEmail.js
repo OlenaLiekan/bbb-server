@@ -165,7 +165,7 @@ function formatOrderToHTML(orderItems, totalCount, deliveryPrice, totalPrice) {
     deliveryPrice +
     " €</b>" +
     '<br><br><b style="font-size: 125%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Valor total: </span>' +
-    parseFloat(totalPrice) + " €</b>";
+    totalPrice + " €</b>";
 
   return formattedOrder + orderSummary;
 }

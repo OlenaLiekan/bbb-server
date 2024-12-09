@@ -149,7 +149,7 @@ const SIBSForm = async (
           transactionID: jsonResponse.transactionID,
           transactionSignature: jsonResponse.transactionSignature,
           formContext: jsonResponse.formContext,
-          amount: jsonResponse.amount.value,
+          amount: parseFloat(jsonResponse.amount.value).toFixed(2),
         },
       };
     } else {

@@ -189,7 +189,7 @@ class SIBSController {
 
             const totalCount = orderItems.reduce((total, item) => total + item.count, 0);
             const deliveryPrice = userOrder.deliveryPrice;
-            const totalPrice = parseFloat(userOrder.sum);
+            const totalPrice = userOrder.sum;
             const orderHTML = email.formatOrderToHTML(
               orderItems,
               totalCount,
