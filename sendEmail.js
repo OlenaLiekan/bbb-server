@@ -24,7 +24,8 @@ const sendEmailToClient = async (
   postalCode,
   comment,
   phone,
-  order
+  order,
+  paymentList
 ) => {
   try {
     const message = {
@@ -40,6 +41,9 @@ const sendEmailToClient = async (
                         <p>Começaremos a preparar o seu pedido logo que recebermos a confirmação do pagamento.</p>
                         <p>Estes são os dados de que precisa para concluir a compra num multibanco ou online.</p>
                         <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Método de pagamento na sua escolha:</p>
+                        <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
+                            ${paymentList}
+                        </div>
                         <p>Tenha presente que terá de realizar o pagamento no máximo <b>de 3 dias</b> corridos.</p>
                         <p>Após o pagamento deverá enviar um <b>comprovativo de pagamento</b> em resposta a esta carta ou para o email <b>bestbuybeauty.pt@gmail.com</b> indicando o número de pedido.</p>
                         <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Data de entrega estimada 1 dia útil. Após recebermos o pagamento da compra.</p>

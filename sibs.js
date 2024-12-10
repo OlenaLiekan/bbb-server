@@ -16,6 +16,7 @@ const SIBSForm = async (
   comment,
   phone,
   order,
+  paymentList,
   sum,
   countryCode
 ) => {
