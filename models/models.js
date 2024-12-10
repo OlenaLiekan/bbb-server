@@ -145,14 +145,6 @@ const DeliveryPrice = sequelize.define('delivery', {
   type: { type: DataTypes.STRING, allowNull: false },
 });
 
-const PaymentDetails = sequelize.define('payment', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  account: { type: DataTypes.STRING, allowNull: false },
-  recipient: { type: DataTypes.STRING, allowNull: false },
-  available: { type: DataTypes.BOOLEAN, allowNull: false },
-  type: { type: DataTypes.STRING, allowNull: false },
-});
-
 const PaymentInformation = sequelize.define(
   'PaymentInformation',
   {
@@ -255,7 +247,6 @@ module.exports = {
   ProductText,
   ProductCompound,
   ProductApplying,
-  PaymentDetails,
   DeliveryPrice,
   PaymentInformation,
 };

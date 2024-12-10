@@ -1,8 +1,8 @@
-const { PaymentInformation, UserAddress, User } = require("./models/models");
-const axios = require("axios");
-const email = require("./sendEmail");
-const crypto = require("crypto");
-const getRawBody = require("raw-body");
+const { PaymentInformation, UserAddress, User } = require('./models/models');
+const axios = require('axios');
+const email = require('./sendEmail');
+const crypto = require('crypto');
+const getRawBody = require('raw-body');
 const { Op } = require('sequelize');
 
 const SIBSForm = async (
@@ -16,13 +16,12 @@ const SIBSForm = async (
   comment,
   phone,
   order,
-  paymentList,
   sum,
   countryCode
 ) => {
   try {
     if (!to || !orderNumber || !sum) {
-      throw new Error("Parâmetros faltando");
+      throw new Error('Parâmetros faltando');
     }
 
     const foundCustomer = await User.findOne({
@@ -30,16 +29,16 @@ const SIBSForm = async (
     });
 
     if (!foundCustomer) {
-      throw new Error("Cliente não encontrado");
+      throw new Error('Cliente não encontrado');
     }
 
-    let addressParts = address.split(",");
+    let addressParts = address.split(',');
     addressParts = addressParts.map(part => {
-      return part.replace(/(Rua:|Número da porta:|Cidade:|Conselho:|País:)/gi, "").trim();
+      return part.replace(/(Rua:|Número da porta:|Cidade:|Conselho:|País:)/gi, '').trim();
     });
 
     if (addressParts.length < 5) {
-      throw new Error("Endereço incompleto ou mal formatado");
+      throw new Error('Endereço incompleto ou mal formatado');
     }
 
     const firstAddressLower = addressParts[0].toLowerCase();
@@ -50,8 +49,8 @@ const SIBSForm = async (
         userId: foundCustomer.id,
         firstAddress: { [Op.iLike]: firstAddressLower },
         city: { [Op.iLike]: cityLower },
-        postalCode: { [Op.iLike]: postalCodeLower }
-      }
+        postalCode: { [Op.iLike]: postalCodeLower },
+      },
     });
 
     if (!existingAddress) {
@@ -68,7 +67,7 @@ const SIBSForm = async (
         country: addressParts[4],
         postalCode: postalCode,
         mainAddress: true,
-        userId: foundCustomer.id
+        userId: foundCustomer.id,
       });
     }
 
@@ -79,15 +78,15 @@ const SIBSForm = async (
         customerName: `${name} ${surname}`,
         customerEmail: to,
         shippingAddress: {
-          street1: address.split(",")[0],
-          street2: address.split(",")[1],
-          city: address.split(",")[2],
+          street1: address.split(',')[0],
+          street2: address.split(',')[1],
+          city: address.split(',')[2],
           postcode: postalCode,
           country: countryCode,
         },
         billingAddress: {
-          street1: address.split(",")[0],
-          city: address.split(",")[2],
+          street1: address.split(',')[0],
+          city: address.split(',')[2],
           postcode: postalCode,
           country: countryCode,
         },
@@ -98,7 +97,7 @@ const SIBSForm = async (
     const request = {
       merchant: {
         terminalId: parseInt(process.env.TERMINAL_ID, 10),
-        channel: "web",
+        channel: 'web',
         merchantTransactionId: orderNumber,
       },
       customer: customer,
@@ -106,28 +105,26 @@ const SIBSForm = async (
         transactionTimestamp: new Date().toISOString(),
         description: orderNumber,
         moto: false,
-        paymentType: "PURS",
-        paymentMethod: ["CARD", "MBWAY", "REFERENCE"],
+        paymentType: 'PURS',
+        paymentMethod: ['CARD', 'MBWAY', 'REFERENCE'],
         amount: {
           value: orderTotal,
-          currency: "EUR",
+          currency: 'EUR',
         },
         paymentReference: {
           entity: process.env.ENTITY_ID,
-          minAmount: { value: orderTotal, currency: "EUR" },
-          maxAmount: { value: orderTotal, currency: "EUR" },
+          minAmount: { value: orderTotal, currency: 'EUR' },
+          maxAmount: { value: orderTotal, currency: 'EUR' },
           initialDatetime: new Date().toISOString(),
-          finalDatetime: new Date(
-            new Date().setDate(new Date().getDate() + 3)
-          ).toISOString(),
+          finalDatetime: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(),
         },
       },
     };
 
     const headers = {
       Authorization: `Bearer ${process.env.TOKEN}`,
-      "X-IBM-Client-Id": process.env.CLIENT_ID,
-      "Content-Type": "application/json"
+      'X-IBM-Client-Id': process.env.CLIENT_ID,
+      'Content-Type': 'application/json',
     };
     const response = await axios.post(process.env.SIBS_URL, request, { headers });
     const jsonResponse = response.data;
@@ -153,21 +150,21 @@ const SIBSForm = async (
         },
       };
     } else {
-      throw new Error("Erro na API da SIBS");
+      throw new Error('Erro na API da SIBS');
     }
   } catch (error) {
-    console.error("Erro ao processar o pagamento:", error);
-    throw new Error("Erro ao processar o pagamento");
+    console.error('Erro ao processar o pagamento:', error);
+    throw new Error('Erro ao processar o pagamento');
   }
 };
 
-const checkPaymentStatus = async (id) => {
+const checkPaymentStatus = async id => {
   try {
     const apiUrl = `${process.env.SIBS_URL}/${id}/status`;
 
     const headers = {
       Authorization: `Bearer ${process.env.TOKEN}`,
-      "X-IBM-Client-Id": process.env.CLIENT_ID,
+      'X-IBM-Client-Id': process.env.CLIENT_ID,
     };
     const response = await axios.get(apiUrl, { headers });
     const jsonResponse = response.data;
@@ -183,19 +180,19 @@ const checkPaymentStatus = async (id) => {
         order.paymentStatus = paymentStatus;
         order.paymentMethod = paymentMethod;
 
-        if (paymentMethod === "MBWAY") {
+        if (paymentMethod === 'MBWAY') {
           order.phoneNumber = jsonResponse.token.value;
-        } else if (paymentMethod === "REFERENCE") {
+        } else if (paymentMethod === 'REFERENCE') {
           order.reference = jsonResponse.paymentReference.reference;
           order.entity = jsonResponse.paymentReference.entity;
         }
 
         try {
           await order.save();
-          console.log("Informações da ordem atualizadas com sucesso.");
+          console.log('Informações da ordem atualizadas com sucesso.');
         } catch (error) {
-          console.error("Erro ao atualizar as informações da ordem na BD:", error);
-          throw new Error("Erro ao atualizar as informações da ordem");
+          console.error('Erro ao atualizar as informações da ordem na BD:', error);
+          throw new Error('Erro ao atualizar as informações da ordem');
         }
       }
 
@@ -221,7 +218,7 @@ async function processPayment(orderData, paymentStatus) {
   const orderDetails = orderData.order;
   const orderId = orderData.orderId;
 
-  if (paymentStatus.paymentStatus === "Success") {
+  if (paymentStatus.paymentStatus === 'Success') {
     await email.sendCompletedEmail(
       clientEmail,
       clientName,
@@ -240,7 +237,9 @@ async function processPayment(orderData, paymentStatus) {
       method: paymentStatus.paymentMethod,
     };
   } else if (
-    paymentStatus.paymentStatus === "Pending" && paymentStatus.paymentMethod === "REFERENCE") {
+    paymentStatus.paymentStatus === 'Pending' &&
+    paymentStatus.paymentMethod === 'REFERENCE'
+  ) {
     const referenceViewModel = {
       reference: paymentStatus.paymentReference.reference,
       entity: paymentStatus.paymentReference.entity,
@@ -265,15 +264,13 @@ async function processPayment(orderData, paymentStatus) {
       method: paymentStatus.paymentMethod,
       data: referenceViewModel,
     };
-  } else if (paymentStatus.paymentMethod === "MBWAY") {
+  } else if (paymentStatus.paymentMethod === 'MBWAY') {
     return {
       state: paymentStatus.paymentStatus,
       method: paymentStatus.paymentMethod,
     };
   } else {
-    throw new Error(
-      "Lamentamos, mas não foi possível concluir o processo de pagamento."
-    );
+    throw new Error('Lamentamos, mas não foi possível concluir o processo de pagamento.');
   }
 }
 
@@ -287,43 +284,43 @@ async function webhook(req) {
 
     return webhookModel;
   } catch (error) {
-    console.error("Erro no webhook:", error);
+    console.error('Erro no webhook:', error);
     return null;
   }
 }
 
 async function processWebhookRequest(req) {
-  const requestTag = req.headers["x-authentication-tag"];
-  const requestVector = req.headers["x-initialization-vector"];
-  const secretKey = Buffer.from(process.env.WEBHOOK_SECRET_KEY, "base64");
+  const requestTag = req.headers['x-authentication-tag'];
+  const requestVector = req.headers['x-initialization-vector'];
+  const secretKey = Buffer.from(process.env.WEBHOOK_SECRET_KEY, 'base64');
   const encryptedBody = await readRawBody(req);
-  const ciphertext = Buffer.from(encryptedBody, "base64");
-  const nonce = Buffer.from(requestVector, "base64");
-  const tag = Buffer.from(requestTag, "base64");
+  const ciphertext = Buffer.from(encryptedBody, 'base64');
+  const nonce = Buffer.from(requestVector, 'base64');
+  const tag = Buffer.from(requestTag, 'base64');
 
   try {
-    const decipher = crypto.createDecipheriv("aes-256-gcm", secretKey, nonce);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', secretKey, nonce);
     decipher.setAuthTag(tag);
-    let decrypted = decipher.update(ciphertext, null, "utf8");
-    decrypted += decipher.final("utf8");
+    let decrypted = decipher.update(ciphertext, null, 'utf8');
+    decrypted += decipher.final('utf8');
     const webhookModel = JSON.parse(decrypted);
 
     return webhookModel;
   } catch (error) {
-    throw new Error("Erro ao processar o webhook");
+    throw new Error('Erro ao processar o webhook');
   }
 }
 
 function generateWebhookResponse(model) {
   return {
-    statusMsg: "Success",
-    statusCode: "200",
+    statusMsg: 'Success',
+    statusCode: '200',
     notificationID: model.notificationID,
   };
 }
 
 async function readRawBody(req) {
-  return await getRawBody(req, { encoding: "utf-8" });
+  return await getRawBody(req, { encoding: 'utf-8' });
 }
 
 module.exports = { SIBSForm, checkPaymentStatus, processPayment, webhook, generateWebhookResponse };

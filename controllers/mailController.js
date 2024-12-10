@@ -14,7 +14,6 @@ class MailController {
       userComment,
       userPhone,
       userOrder,
-      paymentList,
     } = req.body;
     try {
       sendEmail(
@@ -27,8 +26,7 @@ class MailController {
         userPostalCode,
         userComment,
         userPhone,
-        userOrder,
-        paymentList
+        userOrder
       );
       return res.json(req.body);
     } catch (error) {

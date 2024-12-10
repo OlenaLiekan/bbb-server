@@ -1,11 +1,11 @@
-const nodemailer = require("nodemailer");
-require("dotenv").config();
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const user = process.env.EMAIL_USER;
 const pass = process.env.EMAIL_PASSWORD;
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   auth: {
@@ -24,8 +24,7 @@ const sendEmailToClient = async (
   postalCode,
   comment,
   phone,
-  order,
-  paymentList
+  order
 ) => {
   try {
     const message = {
@@ -41,9 +40,6 @@ const sendEmailToClient = async (
                         <p>Começaremos a preparar o seu pedido logo que recebermos a confirmação do pagamento.</p>
                         <p>Estes são os dados de que precisa para concluir a compra num multibanco ou online.</p>
                         <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Método de pagamento na sua escolha:</p>
-                        <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
-                            ${paymentList}
-                        </div>
                         <p>Tenha presente que terá de realizar o pagamento no máximo <b>de 3 dias</b> corridos.</p>
                         <p>Após o pagamento deverá enviar um <b>comprovativo de pagamento</b> em resposta a esta carta ou para o email <b>bestbuybeauty.pt@gmail.com</b> indicando o número de pedido.</p>
                         <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Data de entrega estimada 1 dia útil. Após recebermos o pagamento da compra.</p>
@@ -73,22 +69,12 @@ const sendEmailToClient = async (
     };
 
     const info = await transporter.sendMail(message);
-    console.log("E-mail enviado ao cliente:", info.messageId);
+    console.log('E-mail enviado ao cliente:', info.messageId);
 
-    await sendEmailToStore(
-      to,
-      name,
-      surname,
-      orderNumber,
-      company,
-      address,
-      comment,
-      phone,
-      order
-    );
+    await sendEmailToStore(to, name, surname, orderNumber, company, address, comment, phone, order);
   } catch (error) {
-    console.error("Erro ao enviar e-mail para o cliente:", error);
-    throw new Error("Email could not be sent to client");
+    console.error('Erro ao enviar e-mail para o cliente:', error);
+    throw new Error('Email could not be sent to client');
   }
 };
 
@@ -124,17 +110,17 @@ const sendEmailToStore = async (
         `,
     };
     const result = await transporter.sendMail(newOrder);
-    console.log("E-mail enviado para a loja:", result.messageId);
+    console.log('E-mail enviado para a loja:', result.messageId);
   } catch (error) {
-    console.error("Erro ao enviar e-mail para a loja:", error);
-    throw new Error("Email could not be sent to store");
+    console.error('Erro ao enviar e-mail para a loja:', error);
+    throw new Error('Email could not be sent to store');
   }
 };
 
 function formatOrderToHTML(orderItems, totalCount, deliveryPrice, totalPrice) {
   const formattedOrder = orderItems
     .map((item, index) => {
-      let detailsHTML = "";
+      let detailsHTML = '';
 
       if (item.isLashes) {
         detailsHTML += `Curvatura: ${item.curlArr}<br>Grossura: ${item.thicknessArr} mm<br>Tamanho: ${item.lengthArr} mm<br>`;
@@ -147,7 +133,7 @@ function formatOrderToHTML(orderItems, totalCount, deliveryPrice, totalPrice) {
       }
 
       return (
-        (index > 0 ? "<br><br>" : "") +
+        (index > 0 ? '<br><br>' : '') +
         `<b>${index + 1}. ${item.name}</b><br>` +
         `Marca: ${item.company}<br>` +
         `Código: ${item.code}<br>` +
@@ -155,17 +141,18 @@ function formatOrderToHTML(orderItems, totalCount, deliveryPrice, totalPrice) {
         `Preço: ${item.price} €<br>` +
         `Quantidade: ${item.count}`
       );
-    }
-  ).join("");
+    })
+    .join('');
 
   const orderSummary =
     '<br><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Quantidade total: </span>' +
     totalCount +
     '</b><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Custo de entrega: </span>' +
     deliveryPrice +
-    " €</b>" +
+    ' €</b>' +
     '<br><br><b style="font-size: 125%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Valor total: </span>' +
-    totalPrice + " €</b>";
+    totalPrice +
+    ' €</b>';
 
   return formattedOrder + orderSummary;
 }
@@ -184,11 +171,11 @@ const sendCompletedEmail = async (
 ) => {
   let paymentList;
 
-  if (paymentStatus.paymentMethod === "CARD") {
+  if (paymentStatus.paymentMethod === 'CARD') {
     paymentList = `Cartão de multibanco. Valor total: ${paymentStatus.amount.value} €`;
-  } else if (paymentStatus.paymentMethod === "MBWAY") {
+  } else if (paymentStatus.paymentMethod === 'MBWAY') {
     paymentList = `MBWay. Número de telefone: ${paymentStatus.token.value}. Valor total: ${paymentStatus.amount.value} €`;
-  } else if (paymentStatus.paymentMethod === "REFERENCE") {
+  } else if (paymentStatus.paymentMethod === 'REFERENCE') {
     paymentList = `
         <p>Referência de multibanco: </p>
         <p>Entidade: ${paymentStatus.paymentReference.entity} </p>
@@ -241,9 +228,9 @@ const sendCompletedEmail = async (
     };
 
     const info = await transporter.sendMail(message);
-    console.log("E-mail enviado ao cliente:", info.messageId);
+    console.log('E-mail enviado ao cliente:', info.messageId);
 
-    if (paymentStatus.paymentStatus === "Success") {
+    if (paymentStatus.paymentStatus === 'Success') {
       await sendEmailToStore(
         to,
         name,
@@ -257,8 +244,8 @@ const sendCompletedEmail = async (
       );
     }
   } catch (error) {
-    console.error("Erro ao enviar e-mail para o cliente:", error);
-    throw new Error("Email could not be sent to client");
+    console.error('Erro ao enviar e-mail para o cliente:', error);
+    throw new Error('Email could not be sent to client');
   }
 };
 
@@ -302,12 +289,12 @@ const referencePaidEmail = async (
                     <b>Envio para o domicílio</b>
                   </div>
                   <p>${name} ${surname}</p>
-                  <p>${company ? company : ""}</p>
+                  <p>${company ? company : ''}</p>
                   <p>${address}</p>
                   <p>Tel. ${phone}</p>
                   <p>E-mail: ${to}</p>
                   <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Um comentário: ${
-                    comment ? comment : "Sem comentários"
+                    comment ? comment : 'Sem comentários'
                   }</p>
                 </div>
               </div>
@@ -317,11 +304,17 @@ const referencePaidEmail = async (
     };
 
     const info = await transporter.sendMail(message);
-    console.log("E-mail enviado ao cliente:", info.messageId);
+    console.log('E-mail enviado ao cliente:', info.messageId);
   } catch (error) {
-    console.error("Erro ao enviar e-mail para o cliente:", error);
-    throw new Error("Email could not be sent to client");
+    console.error('Erro ao enviar e-mail para o cliente:', error);
+    throw new Error('Email could not be sent to client');
   }
 };
 
-module.exports = { sendEmailToClient, sendCompletedEmail, sendEmailToStore, formatOrderToHTML, referencePaidEmail };
+module.exports = {
+  sendEmailToClient,
+  sendCompletedEmail,
+  sendEmailToStore,
+  formatOrderToHTML,
+  referencePaidEmail,
+};

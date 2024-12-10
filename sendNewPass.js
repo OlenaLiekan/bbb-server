@@ -18,7 +18,7 @@ const sendNewPass = async (to, name, newPassword) => {
     const message = {
       to,
       from: `Best Buy Beauty ${user}`,
-      subject: `Solicitação de alteração de senha`,
+      subject: `Solicitação de alteração de palavra-passe`,
       html: `
         <div style='background-color: #f6f6f6; padding: 30px 0;'>
             <div style='letter-spacing: 0.5px; text-align: center; padding: 15px; background-color: #fff; width: 280px; margin: auto;'>
@@ -27,10 +27,10 @@ const sendNewPass = async (to, name, newPassword) => {
                 </h2>
                 <div>
                     <h4 style='color: #AD902B;'>
-                        Você recebeu este e-mail porque solicitou a alteração da senha da sua conta.
+                        Você recebeu este e-mail porque solicitou a alteração da palavra-passe da sua conta.
                     </h4>                        
                     <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
-                        Este e-mail fornece uma nova senha:
+                        Este e-mail fornece uma nova palavra-passe:
                     </p>
                     <h3 style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
                         ${newPassword}
