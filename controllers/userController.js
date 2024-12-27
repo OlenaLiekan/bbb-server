@@ -7,7 +7,6 @@ const {
   UserOrder,
   OrderItem,
   UserAddress,
-  UserPromocode,
   PaymentInformation,
 } = require('../models/models');
 
@@ -79,10 +78,6 @@ class UserController {
           as: 'order',
           include: [{ model: OrderItem, as: 'item' }],
         },
-        {
-          model: UserPromocode,
-          as: 'user_promocode',
-        },
       ],
     };
     if (role) {
@@ -98,7 +93,6 @@ class UserController {
       where: {},
       include: [
         { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
-        { model: UserPromocode, as: 'user_promocode' },
         {
           model: UserAddress,
           as: 'address',
@@ -118,7 +112,6 @@ class UserController {
       where: {},
       include: [
         { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
-        { model: UserPromocode, as: 'user_promocode' },
         {
           model: UserAddress,
           as: 'address',
