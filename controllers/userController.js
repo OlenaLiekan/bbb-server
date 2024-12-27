@@ -81,7 +81,7 @@ class UserController {
         },
         {
           model: UserPromocode,
-          as: 'promocode',
+          as: 'user_promocode',
         },
       ],
     };
@@ -98,7 +98,7 @@ class UserController {
       where: {},
       include: [
         { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
-        { model: UserPromocode, as: 'promocode' },
+        { model: UserPromocode, as: 'user_promocode' },
         {
           model: UserAddress,
           as: 'address',
@@ -118,7 +118,7 @@ class UserController {
       where: {},
       include: [
         { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
-        { model: UserPromocode, as: 'promocode' },
+        { model: UserPromocode, as: 'user_promocode' },
         {
           model: UserAddress,
           as: 'address',
