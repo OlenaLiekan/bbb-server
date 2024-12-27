@@ -161,7 +161,7 @@ const PaymentDetails = sequelize.define('payment', {
 const Promocode = sequelize.define('promocode', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, allowNull: false },
-  value: { type: DataTypes.NUMBER, allowNull: false },
+  value: { type: DataTypes.STRING, allowNull: false },
   newMember: { type: DataTypes.BOOLEAN, allowNull: false },
 });
 
