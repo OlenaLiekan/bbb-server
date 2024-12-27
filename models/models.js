@@ -28,6 +28,11 @@ const UserOrder = sequelize.define('user_order', {
   userComment: { type: DataTypes.STRING, allowNull: true },
 });
 
+const UserPromocode = sequelize.define('user_promocode', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, allowNull: false },
+});
+
 const UserAddress = sequelize.define('user_address', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   firstName: { type: DataTypes.STRING, allowNull: false },
@@ -153,6 +158,13 @@ const PaymentDetails = sequelize.define('payment', {
   type: { type: DataTypes.STRING, allowNull: false },
 });
 
+const Promocode = sequelize.define('promocode', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, allowNull: false },
+  value: { type: DataTypes.NUMBER, allowNull: false },  
+  newMember: { type: DataTypes.BOOLEAN, allowNull: false },
+});
+
 const PaymentInformation = sequelize.define(
   'PaymentInformation',
   {
@@ -179,6 +191,9 @@ Basket.belongsTo(User);
 
 User.hasMany(UserOrder, { as: 'order' });
 UserOrder.belongsTo(User);
+
+User.hasMany(UserPromocode, { as: 'promocode' });
+UserPromocode.belongsTo(User);
 
 User.hasMany(UserAddress, { as: 'address' });
 UserAddress.belongsTo(User);
@@ -257,5 +272,7 @@ module.exports = {
   ProductApplying,
   DeliveryPrice,
   PaymentDetails,
+  Promocode,
+  UserPromocode,
   PaymentInformation,
 };
