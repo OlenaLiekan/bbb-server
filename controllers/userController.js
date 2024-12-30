@@ -65,16 +65,6 @@ class UserController {
     }
   }
 
-  async newMember(req, res, next) {
-    const { userEmail, userName, promocode, promocodeValue } = req.body;
-    try {
-      sendPromocode(userEmail, userName, promocode, promocodeValue);
-      return res.json(req.body);
-    } catch (error) {
-      next(ApiError.badRequest(error.message));
-    }
-  }
-
   async refreshToken(req, res, next) {
     const token = generateJwt(req.user.id, req.user.email, req.user.role);
     return res.json({ token });
