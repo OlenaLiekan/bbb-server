@@ -1,6 +1,7 @@
 const ApiError = require('../error/ApiError');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const sendPromocode = require('../sendPromocode');
 const {
   User,
   Basket,
@@ -61,6 +62,16 @@ class UserController {
       return res.json({ token });
     } catch (error) {
       console.log('error:', error);
+    }
+  }
+
+  async newMember(req, res, next) {
+    const { userEmail, userName, promocode, promocodeValue } = req.body;
+    try {
+      sendPromocode(userEmail, userName, promocode, promocodeValue);
+      return res.json(req.body);
+    } catch (error) {
+      next(ApiError.badRequest(error.message));
     }
   }
 

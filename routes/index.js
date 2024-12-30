@@ -15,7 +15,6 @@ const deliveryRouter = require('./deliveryRouter');
 const paymentRouter = require('./paymentRouter');
 const mailRouter = require('./mailRouter');
 const newPassRouter = require('./newPassRouter');
-const sendPromocodeRouter = require('./sendPromocodeRouter');
 const promocodeRouter = require('./promocodeRouter');
 const sibsRouter = require('./sibsRouter');
 
@@ -32,7 +31,6 @@ router.use('/payment', paymentRouter);
 router.use('/logo', logoRouter);
 router.use('/send-email', mailRouter);
 router.use('/reset-password', newPassRouter);
-router.use('/new-member', sendPromocodeRouter);
 router.use('/promocode', promocodeRouter);
 router.use('/sibs', sibsRouter);
 
