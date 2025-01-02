@@ -1,7 +1,7 @@
 const ApiError = require('../error/ApiError');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const sendPromocode = require('../sendPromocode');
+
 const {
   User,
   Basket,
