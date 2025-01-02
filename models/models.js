@@ -193,7 +193,7 @@ Basket.belongsTo(User);
 User.hasMany(UserOrder, { as: 'order' });
 UserOrder.belongsTo(User);
 
-User.hasMany(UserPromocode, { as: 'user_promocode' });
+User.hasMany(UserPromocode, { as: 'promocode' });
 UserPromocode.belongsTo(User);
 
 User.hasMany(UserAddress, { as: 'address' });
