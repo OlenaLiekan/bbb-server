@@ -119,7 +119,6 @@ class UserController {
       where: {},
       include: [
         { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
-        { model: UserPromocode, as: 'user_promocode' },
         {
           model: UserAddress,
           as: 'address',
