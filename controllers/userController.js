@@ -174,6 +174,8 @@ class UserController {
       mainAddress,
       deletedAddressId,
       updatedAddressId,
+      promocode,
+      orderId,
     } = req.body;
 
     let options = {
@@ -242,6 +244,14 @@ class UserController {
           img: item.img,
           userOrderId: userOrder.id,
         });
+      });
+    }
+
+    if (userId && promocode) {
+      UserPromocode.create({
+        userId,
+        name: promocode,
+        orderId,
       });
     }
 

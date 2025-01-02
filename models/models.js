@@ -31,6 +31,7 @@ const UserOrder = sequelize.define('user_order', {
 const UserPromocode = sequelize.define('user_promocode', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, allowNull: false },
+  orderId: { type: DataTypes.STRING, allowNull: false },
 });
 
 const UserAddress = sequelize.define('user_address', {
