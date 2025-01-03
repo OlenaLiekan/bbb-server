@@ -157,21 +157,21 @@ function formatOrderToHTML(
 
   const orderSummary =
     '<br><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Quantidade total: </span>' +
-      totalCount +
-      '</b><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Custo de entrega: </span>' +
-      deliveryPrice +
-      ' €</b>' +
-      promocodeName && promocodeValue
+    totalCount +
+    '</b><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Custo de entrega: </span>' +
+    deliveryPrice +
+    ' €</b>' +
+    (promocodeName && promocodeValue
       ? '<br><br><b style="font-size: 110%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Desconto: </span>' +
         '- ' +
         promocodeValue +
         '%  ' +
         promocodeName +
         '</b>'
-      : '' +
-        '<br><br><b style="font-size: 125%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Valor total: </span>' +
-        totalPrice +
-        ' €</b>';
+      : '') +
+    '<br><br><b style="font-size: 125%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Valor total: </span>' +
+    totalPrice +
+    ' €</b>';
 
   return formattedOrder + orderSummary;
 }
