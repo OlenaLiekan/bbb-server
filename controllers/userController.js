@@ -176,6 +176,8 @@ class UserController {
       updatedAddressId,
       promocode,
       orderId,
+      promocodeName,
+      promocodeValue,
     } = req.body;
 
     let options = {
@@ -215,6 +217,8 @@ class UserController {
         sum,
         orderNumber,
         userComment,
+        promocodeName,
+        promocodeValue,
       });
       items = JSON.parse(items);
       items.forEach(item => {
@@ -249,9 +253,9 @@ class UserController {
 
     if (userId && promocode) {
       UserPromocode.create({
-        userId,
         name: promocode,
         orderId,
+        userId,
       });
     }
 

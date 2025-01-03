@@ -190,11 +190,15 @@ class SIBSController {
             const totalCount = orderItems.reduce((total, item) => total + item.count, 0);
             const deliveryPrice = userOrder.deliveryPrice;
             const totalPrice = userOrder.sum;
+            const promocodeName = userOrder.promocodeName;
+            const promocodeValue = userOrder.promocodeValue;
             const orderHTML = email.formatOrderToHTML(
               orderItems,
               totalCount,
               deliveryPrice,
-              totalPrice
+              totalPrice,
+              promocodeName,
+              promocodeValue
             );
             const customerAddress = await UserAddress.findOne({
               where: { email: order.customerEmail },

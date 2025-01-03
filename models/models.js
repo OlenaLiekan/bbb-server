@@ -26,6 +26,8 @@ const UserOrder = sequelize.define('user_order', {
   deliveryPrice: { type: DataTypes.STRING, allowNull: false },
   orderNumber: { type: DataTypes.STRING, allowNull: false },
   userComment: { type: DataTypes.STRING, allowNull: true },
+  promocodeName: { type: DataTypes.STRING, allowNull: true },
+  promocodeValue: { type: DataTypes.STRING, allowNull: true },
 });
 
 const UserPromocode = sequelize.define('user_promocode', {
