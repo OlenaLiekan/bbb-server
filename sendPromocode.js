@@ -30,7 +30,7 @@ const sendPromocode = async (to, name, promocode, promocodeValue) => {
                         Obrigado por se cadastrar em nosso site!
                     </h4>                        
                     <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
-                        Seu presente de registro é um código promocional com 5% de desconto no seu primeiro pedido:
+                        Seu presente de registro é um <b>código promocional com 5% de desconto</b> no seu primeiro pedido:
                     </p>
                     <h3 style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
                         ${promocode}
