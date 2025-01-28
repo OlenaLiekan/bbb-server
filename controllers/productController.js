@@ -27,6 +27,7 @@ class ProductController {
         isLashes,
         available,
         topProduct,
+        exclusiveProduct,
         text,
         compound,
         applying,
@@ -69,6 +70,7 @@ class ProductController {
         isLashes,
         available,
         topProduct,
+        exclusiveProduct,
       });
 
       ProductText.create({
@@ -148,6 +150,7 @@ class ProductController {
       deletedSlideId,
       available,
       topProduct,
+      exclusiveProduct,
     } = req.body;
 
     const { img } = req.files ? req.files : '';
@@ -204,7 +207,7 @@ class ProductController {
     }
     props = { ...props, discountPrice };
 
-    props = { ...props, isLashes, available, topProduct, isPromo };
+    props = { ...props, isLashes, available, topProduct, exclusiveProduct, isPromo };
 
     const product = await Product.update(props, options);
 

@@ -69,6 +69,7 @@ const Product = sequelize.define('product', {
   isLashes: { type: DataTypes.BOOLEAN, allowNull: false },
   available: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   topProduct: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  exclusiveProduct: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
   isPromo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 });
