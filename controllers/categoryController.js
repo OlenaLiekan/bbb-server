@@ -4,8 +4,8 @@ const ApiError = require('../error/ApiError');
 class CategoryController {
   async create(req, res, next) {
     try {
-      const { name, subMenu } = req.body;
-      const category = await Category.create({ name, subMenu });
+      const { name, subMenu, position } = req.body;
+      const category = await Category.create({ name, subMenu, position });
       return res.json(category);
     } catch (e) {
       next(ApiError.badRequest(e.message));
