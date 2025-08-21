@@ -18,6 +18,22 @@ class CategoryController {
     });
     return res.json(categories);
   }
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { position } = req.body;
+      const options = { where: { id: id } };
+      let props = {};
+      if (position) {
+        props = { ...props, position };
+      }
+      const category = await Category.update(props, options);
+      return res.json(category);
+    } catch (e) {
+      next(ApiError.badRequest(e.message));
+    }
+  }
 }
 
 module.exports = new CategoryController();
