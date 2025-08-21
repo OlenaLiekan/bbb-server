@@ -4,5 +4,6 @@ const ratingController = require('../controllers/ratingController');
 
 router.post('/', ratingController.create);
 router.get('/', ratingController.getAll);
+router.delete('/', ratingController.destroy);
 
 module.exports = router;

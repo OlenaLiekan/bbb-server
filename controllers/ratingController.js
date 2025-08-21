@@ -24,6 +24,14 @@ class RatingController {
     const ratings = await Rating.findAll(options);
     return res.json(ratings);
   }
+
+  async destroy(req, res) {
+    const { id } = req.query;
+    const rating = await Rating.destroy({
+      where: { id },
+    });
+    return res.json(rating);
+  }
 }
 
 module.exports = new RatingController();

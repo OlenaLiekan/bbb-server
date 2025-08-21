@@ -16,6 +16,14 @@ class ReviewController {
     const reviews = await Review.findAll();
     return res.json(reviews);
   }
+
+  async destroy(req, res) {
+    const { id } = req.query;
+    const review = await Review.destroy({
+      where: { id },
+    });
+    return res.json(review);
+  }
 }
 
 module.exports = new ReviewController();
