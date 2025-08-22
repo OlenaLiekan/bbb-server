@@ -303,8 +303,8 @@ module.exports = {
   DeliveryPrice,
   PaymentDetails,
   Promocode,
-  Promotion,
   PromotionInfo,
+  Promotion,
   UserPromocode,
   PaymentInformation,
 };
