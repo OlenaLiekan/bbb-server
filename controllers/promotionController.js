@@ -17,8 +17,8 @@ class PromotionController {
         info = JSON.parse(info);
         info.forEach(i =>
           PromotionInfo.create({
-            title: i.title,
-            description: i.description,
+            title: i.name,
+            description: i.discount,
             promotionId: promotion.id,
           })
         );
@@ -55,8 +55,8 @@ class PromotionController {
       info = JSON.parse(info);
       info.forEach(i =>
         PromotionInfo.create({
-          title: i.title,
-          description: i.description,
+          title: i.name,
+          description: i.discount,
           promotionId: promotionId,
         })
       );
