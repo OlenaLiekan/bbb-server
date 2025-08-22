@@ -175,6 +175,19 @@ const Promocode = sequelize.define('promocode', {
   newMember: { type: DataTypes.BOOLEAN, allowNull: false },
 });
 
+const Promotion = sequelize.define('promotion', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, allowNull: false },
+  startDate: { type: DataTypes.STRING, allowNull: false },
+  finishDate: { type: DataTypes.BOOLEAN, allowNull: false },
+});
+
+const PromotionInfo = sequelize.define('promotion_info', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  title: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.STRING, allowNull: false },
+});
+
 const PaymentInformation = sequelize.define(
   'PaymentInformation',
   {
@@ -262,6 +275,9 @@ ProductApplying.belongsTo(Product);
 Type.belongsToMany(Brand, { through: TypeBrand });
 Brand.belongsToMany(Type, { through: TypeBrand });
 
+Promotion.hasMany(PromotionInfo, { as: 'info' });
+PromotionInfo.belongsTo(Promotion);
+
 module.exports = {
   User,
   UserOrder,
@@ -287,6 +303,8 @@ module.exports = {
   DeliveryPrice,
   PaymentDetails,
   Promocode,
+  Promotion,
+  PromotionInfo,
   UserPromocode,
   PaymentInformation,
 };
