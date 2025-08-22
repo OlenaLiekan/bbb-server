@@ -179,7 +179,7 @@ const Promotion = sequelize.define('promotion', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, allowNull: false },
   startDate: { type: DataTypes.STRING, allowNull: false },
-  finishDate: { type: DataTypes.BOOLEAN, allowNull: false },
+  finishDate: { type: DataTypes.STRING, allowNull: false },
 });
 
 const PromotionInfo = sequelize.define('promotion_info', {
