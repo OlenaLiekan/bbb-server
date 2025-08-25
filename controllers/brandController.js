@@ -26,7 +26,7 @@ class BrandController {
 
   async update(req, res) {
     const { id } = req.params;
-    let { name } = req.body;
+    let { name, discount } = req.body;
 
     const { img } = req.files ? req.files : '';
 
@@ -36,6 +36,11 @@ class BrandController {
     if (name) {
       props = { ...props, name };
     }
+
+    if (discount) {
+      props = { ...props, discount };
+    }
+
     if (img) {
       const cloudFile = await upload(img.tempFilePath);
       const fileName = cloudFile.secure_url.split('/').pop();
