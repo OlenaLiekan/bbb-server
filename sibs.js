@@ -54,6 +54,13 @@ const SIBSForm = async (
       },
     });
 
+    const existingMainAddress = await UserAddress.findOne({
+      where: {
+        userId: foundCustomer.id,
+        mainAddress: true,
+      },
+    });
+
     if (!existingAddress) {
       await UserAddress.create({
         firstName: name,
@@ -67,7 +74,7 @@ const SIBSForm = async (
         region: addressParts[3],
         country: addressParts[4],
         postalCode: postalCode,
-        mainAddress: true,
+        mainAddress: existingMainAddress ? false : true,
         userId: foundCustomer.id,
       });
     }
