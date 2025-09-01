@@ -309,7 +309,6 @@ class ProductController {
       price,
       discountPrice,
       isPromo,
-      newProduct,
     } = req.query;
     const offset = page * limit - limit;
 
@@ -361,10 +360,6 @@ class ProductController {
 
     if (isPromo) {
       options.where = { ...options.where, isPromo };
-    }
-
-    if (newProduct) {
-      options.where = { ...options.where, newProduct };
     }
 
     const products = await Product.findAndCountAll(options);
