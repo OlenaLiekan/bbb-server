@@ -74,6 +74,14 @@ class PromotionController {
     const promotions = await Promotion.findAll(options);
     return res.json(promotions);
   }
+
+  async destroy(req, res) {
+    const { id } = req.query;
+    const promotion = await Promotion.destroy({
+      where: { id },
+    });
+    return res.json(promotion);
+  }
 }
 
 module.exports = new PromotionController();

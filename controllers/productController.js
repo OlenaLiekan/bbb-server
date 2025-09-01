@@ -29,6 +29,7 @@ class ProductController {
         topProduct,
         exclusiveProduct,
         text,
+        newProduct,
         compound,
         applying,
       } = req.body;
@@ -71,6 +72,7 @@ class ProductController {
         available,
         topProduct,
         exclusiveProduct,
+        newProduct,
       });
 
       ProductText.create({
@@ -151,6 +153,7 @@ class ProductController {
       available,
       topProduct,
       exclusiveProduct,
+      newProduct,
     } = req.body;
 
     const { img } = req.files ? req.files : '';
@@ -205,9 +208,17 @@ class ProductController {
     if (rating) {
       props = { ...props, rating };
     }
-    props = { ...props, discountPrice };
 
-    props = { ...props, isLashes, available, topProduct, exclusiveProduct, isPromo };
+    props = {
+      ...props,
+      isLashes,
+      available,
+      topProduct,
+      exclusiveProduct,
+      isPromo,
+      discountPrice,
+      newProduct,
+    };
 
     const product = await Product.update(props, options);
 
@@ -298,6 +309,7 @@ class ProductController {
       price,
       discountPrice,
       isPromo,
+      newProduct,
     } = req.query;
     const offset = page * limit - limit;
 
@@ -349,6 +361,10 @@ class ProductController {
 
     if (isPromo) {
       options.where = { ...options.where, isPromo };
+    }
+
+    if (newProduct) {
+      options.where = { ...options.where, newProduct };
     }
 
     const products = await Product.findAndCountAll(options);
