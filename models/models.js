@@ -174,6 +174,8 @@ const Promocode = sequelize.define('promocode', {
   name: { type: DataTypes.STRING, allowNull: false },
   value: { type: DataTypes.STRING, allowNull: false },
   newMember: { type: DataTypes.BOOLEAN, allowNull: false },
+  reusable: { type: DataTypes.BOOLEAN, allowNull: false },
+  brandId: { type: DataTypes.STRING, allowNull: false },
 });
 
 const Promotion = sequelize.define('promotion', {

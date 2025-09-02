@@ -4,8 +4,8 @@ const ApiError = require('../error/ApiError');
 class PromocodeController {
   async create(req, res, next) {
     try {
-      const { name, value, newMember } = req.body;
-      const promocode = await Promocode.create({ name, value, newMember });
+      const { name, value, newMember, reusable, brandId } = req.body;
+      const promocode = await Promocode.create({ name, value, newMember, reusable, brandId });
       return res.json(promocode);
     } catch (e) {
       next(ApiError.badRequest(e.message));
@@ -38,7 +38,7 @@ class PromocodeController {
   async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { name, value, newMember } = req.body;
+      const { name, value, newMember, reusable, brandId } = req.body;
       const options = { where: { id: id } };
       let props = {};
       if (name) {
@@ -47,9 +47,9 @@ class PromocodeController {
       if (value) {
         props = { ...props, value };
       }
-      if (newMember) {
-        props = { ...props, newMember };
-      }
+      props = { ...props, newMember };
+      props = { ...props, reusable };
+      props = { ...props, brandId };
       const promocode = await Promocode.update(props, options);
       return res.json(promocode);
     } catch (e) {
