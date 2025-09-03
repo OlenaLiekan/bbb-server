@@ -201,7 +201,7 @@ class SIBSController {
               promocodeValue
             );
             const customerAddress = await UserAddress.findOne({
-              where: { email: order.customerEmail },
+              where: { mainAddress: true },
             });
 
             if (!customerAddress) {

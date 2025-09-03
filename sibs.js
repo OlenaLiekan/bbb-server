@@ -62,6 +62,14 @@ const SIBSForm = async (
     });
 
     if (!existingAddress) {
+      if (existingMainAddress) {
+        let options = {
+          where: { id: existingMainAddress.id },
+        };
+        let props = {};
+        props = { ...props, mainAddress: false };
+        await UserAddress.update(props, options);
+      }
       await UserAddress.create({
         firstName: name,
         lastName: surname,
@@ -74,7 +82,7 @@ const SIBSForm = async (
         region: addressParts[3],
         country: addressParts[4],
         postalCode: postalCode,
-        mainAddress: existingMainAddress ? false : true,
+        mainAddress: true,
         userId: foundCustomer.id,
       });
     }
