@@ -202,7 +202,7 @@ class SIBSController {
             );
             const customerAddress = await UserAddress.findOne({
               where: {
-                email: order.email,
+                email: order.customerEmail,
                 mainAddress: true,
               },
             });
