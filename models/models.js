@@ -117,6 +117,11 @@ const Reply = sequelize.define('reply', {
   text: { type: DataTypes.STRING, allowNull: false },
 });
 
+const ProductRelated = sequelize.define('product_related', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  referenceCode: { type: DataTypes.STRING, allowNull: false },
+});
+
 const ProductInfo = sequelize.define('product_info', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   title: { type: DataTypes.STRING, allowNull: false },
@@ -260,6 +265,9 @@ Reply.belongsTo(Review);
 Product.hasMany(BasketProduct);
 BasketProduct.belongsTo(Product);
 
+Product.hasMany(ProductRelated, { as: 'related' });
+ProductRelated.belongsTo(Product);
+
 Product.hasMany(ProductInfo, { as: 'info' });
 ProductInfo.belongsTo(Product);
 
@@ -296,6 +304,7 @@ module.exports = {
   Review,
   Reply,
   TypeBrand,
+  ProductRelated,
   ProductInfo,
   ProductSlide,
   Slide,

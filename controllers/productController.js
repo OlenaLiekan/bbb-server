@@ -7,6 +7,7 @@ const {
   ProductText,
   ProductApplying,
   ProductCompound,
+  ProductRelated,
 } = require('../models/models');
 const ApiError = require('../error/ApiError');
 const { upload } = require('../cloudinary');
@@ -24,6 +25,7 @@ class ProductController {
         brandId,
         typeId,
         info,
+        related,
         isLashes,
         available,
         topProduct,
@@ -101,6 +103,16 @@ class ProductController {
         );
       }
 
+      if (related) {
+        related = JSON.parse(related);
+        related.forEach(i =>
+          ProductRelated.create({
+            referenceCode: i.code,
+            productId: product.id,
+          })
+        );
+      }
+
       if (slide) {
         if (slide.length > 1) {
           slideNames.forEach(img => {
@@ -145,6 +157,7 @@ class ProductController {
       brandId,
       typeId,
       info,
+      related,
       isLashes,
       text,
       applying,
@@ -269,6 +282,19 @@ class ProductController {
       );
     }
 
+    if (related) {
+      const productId = req.params.id;
+      const relatedOps = { where: { productId: productId } };
+      ProductRelated.destroy(relatedOps);
+      related = JSON.parse(related);
+      related.forEach(i =>
+        ProductRelated.create({
+          referenceCode: i.code,
+          productId: productId,
+        })
+      );
+    }
+
     if (deletedSlideId) {
       deletedSlideId = JSON.parse(deletedSlideId);
       deletedSlideId.forEach(slideId => {
@@ -322,6 +348,7 @@ class ProductController {
       distinct: true,
       where: {},
       include: [
+        { model: ProductRelated, as: 'related' },
         { model: ProductInfo, as: 'info' },
         { model: ProductSlide, as: 'slide' },
         { model: ProductText, as: 'text' },
@@ -373,6 +400,7 @@ class ProductController {
       const product = await Product.findOne({
         where: { id },
         include: [
+          { model: ProductRelated, as: 'related' },
           { model: ProductInfo, as: 'info' },
           { model: ProductSlide, as: 'slide' },
           { model: ProductText, as: 'text' },
