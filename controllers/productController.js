@@ -107,7 +107,7 @@ class ProductController {
         related = JSON.parse(related);
         related.forEach(i =>
           ProductRelated.create({
-            referenceCode: i.code,
+            referenceCode: i.referenceCode,
             productId: product.id,
           })
         );
@@ -289,7 +289,7 @@ class ProductController {
       related = JSON.parse(related);
       related.forEach(i =>
         ProductRelated.create({
-          referenceCode: i.code,
+          referenceCode: i.referenceCode,
           productId: productId,
         })
       );
