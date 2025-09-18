@@ -46,7 +46,7 @@ const sendEmailToClient = async (
                         </div>
                         <p>Tenha presente que terá de realizar o pagamento no máximo <b>de 3 dias</b> corridos.</p>
                         <p>Após o pagamento deverá enviar um <b>comprovativo de pagamento</b> em resposta a esta carta ou para o email <b>bestbuybeauty.pt@gmail.com</b> indicando o número de pedido.</p>
-                        <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Data de entrega estimada 1 dia útil. Após recebermos o pagamento da compra.</p>
+                        <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Data estimada de entrega: 1 a 2 dias úteis após o recebimento do pagamento da sua compra.</p>
                         <h3 style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Dados do pedido</h3>
                         <div>
                             <div style='padding-bottom: 15px; font-size: 120%;'>
@@ -221,7 +221,7 @@ const sendCompletedEmail = async (
                         <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
                             ${paymentList}
                         </div>
-                        <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Data de entrega estimada 1 dia útil.</p>
+                        <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Data estimada de entrega: 1 a 2 dias úteis após o recebimento do pagamento da sua compra.</p>
                         <h3 style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Dados do pedido</h3>
                         <div>
                             <div style='padding-bottom: 15px; font-size: 120%;'>
