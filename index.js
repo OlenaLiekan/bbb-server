@@ -11,6 +11,7 @@ const path = require('path');
 const colors = require('colors');
 const { setSecurityHeaders } = require('./security');
 const cookieParser = require('cookie-parser');
+const { retryPendingWebhooks } = require('./services/webhookRetryService');
 
 const PORT = process.env.PORT || 3001;
 
@@ -29,12 +30,23 @@ app.use(cookieParser());
 //Last in list
 app.use(errorHandler);
 
+setInterval(async () => {
+  try {
+    console.log('🔄 [Cron] Running scheduled webhook retry...'.yellow);
+    await retryPendingWebhooks();
+    console.log('✅ [Cron] Webhook retry completed'.green);
+  } catch (error) {
+    console.error('❌ [Cron] Error in retry interval:'.red, error);
+  }
+}, 10 * 60 * 1000);
+
 const start = async () => {
   try {
     await sequelize.authenticate();
     await sequelize.sync();
     app.listen(PORT, () => {
-      console.log(`App running on port ${PORT}`.bgWhite.black);
+      console.log(`✅ App running on port ${PORT}`.bgWhite.black);
+      console.log('🔄 Webhook retry service started (runs every 10 minutes)'.cyan);
     });
     app.get('/', (req, res) => {
       res.json({
@@ -42,7 +54,7 @@ const start = async () => {
       });
     });
   } catch (e) {
-    console.log(e);
+    console.log('❌ Server startup error:'.red, e);
   }
 };
 

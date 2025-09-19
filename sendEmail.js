@@ -27,6 +27,12 @@ const sendEmailToClient = async (
   order,
   paymentList
 ) => {
+  console.log('[sendEmail] sendEmailToClient called for order:', orderNumber);
+
+  if (!to || !name || !orderNumber) {
+    console.error('[sendEmail] Email missing required fields: to, name or orderNumber');
+    return;
+  }
   try {
     const message = {
       to,
@@ -93,6 +99,11 @@ const sendEmailToStore = async (
   phone,
   order
 ) => {
+  console.log('[sendEmail] sendEmailToStore called for order:', orderNumber);
+  if (!to || !name || !orderNumber) {
+    console.error('[sendEmail] Store email missing required fields');
+    return;
+  }
   try {
     const newOrder = {
       to: user,
@@ -188,6 +199,13 @@ const sendCompletedEmail = async (
   order,
   paymentStatus
 ) => {
+  console.log('[sendEmail] sendCompletedEmail called for order:', orderNumber);
+
+  if (!to || !name || !orderNumber || !paymentStatus) {
+    console.error('[sendEmail] Completed email missing required fields');
+    return;
+  }
+
   let paymentList;
 
   if (paymentStatus.paymentMethod === 'CARD') {
@@ -279,6 +297,11 @@ const referencePaidEmail = async (
   phone,
   paymentStatus
 ) => {
+  console.log('[sendEmail] referencePaidEmail called for order:', orderNumber);
+  if (!to || !name || !orderNumber || !paymentStatus) {
+    console.error('[sendEmail] Reference email missing required fields');
+    return;
+  }
   let paymentList = `
       <p><b>Status do pagamento:</b> ${paymentStatus}</p>
       <p><b>Método de pagamento:</b> Referência</p>

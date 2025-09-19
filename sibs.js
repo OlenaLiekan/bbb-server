@@ -20,6 +20,7 @@ const SIBSForm = async (
   sum,
   countryCode
 ) => {
+  console.log('[sibs] SIBSForm called with orderNumber:', orderNumber);
   try {
     if (!to || !orderNumber || !sum) {
       throw new Error('Parâmetros faltando');
@@ -175,6 +176,7 @@ const SIBSForm = async (
 };
 
 const checkPaymentStatus = async id => {
+  console.log('[sibs] checkPaymentStatus called for transactionID:', id);
   try {
     const apiUrl = `${process.env.SIBS_URL}/${id}/status`;
 
@@ -188,6 +190,11 @@ const checkPaymentStatus = async id => {
     if (response.status === 200) {
       const paymentStatus = jsonResponse.paymentStatus;
       const paymentMethod = jsonResponse.paymentMethod;
+
+      console.log(
+        `[sibs DEBUG] Looking for transactionID: ${id}, current time: ${new Date().toISOString()}`
+      );
+
       const order = await PaymentInformation.findOne({
         where: { transactionID: id },
       });
@@ -210,6 +217,9 @@ const checkPaymentStatus = async id => {
           console.error('Erro ao atualizar as informações da ordem na BD:', error);
           throw new Error('Erro ao atualizar as informações da ordem');
         }
+      } else {
+        console.warn(`[Payment] Order with transactionID ${id} not found in database`);
+        return null;
       }
 
       return jsonResponse;
@@ -306,6 +316,7 @@ async function webhook(req) {
 }
 
 async function processWebhookRequest(req) {
+  console.log('[sibs] processWebhookRequest started');
   const requestTag = req.headers['x-authentication-tag'];
   const requestVector = req.headers['x-initialization-vector'];
   const secretKey = Buffer.from(process.env.WEBHOOK_SECRET_KEY, 'base64');
@@ -320,6 +331,19 @@ async function processWebhookRequest(req) {
     let decrypted = decipher.update(ciphertext, null, 'utf8');
     decrypted += decipher.final('utf8');
     const webhookModel = JSON.parse(decrypted);
+
+    if (!webhookModel.amount || !webhookModel.amount.value) {
+      console.error('[sibs webhookModel] Invalid webhook: missing amount', webhookModel);
+      throw new Error('[sibs webhookModel] Missing amount in webhook');
+    }
+
+    console.log('[sibs processWebhookRequest] Webhook received:', {
+      transactionID: webhookModel.transactionID,
+      paymentStatus: webhookModel.paymentStatus,
+      paymentMethod: webhookModel.paymentMethod,
+      amount: `${webhookModel.amount.value} ${webhookModel.amount.currency}`,
+      merchantTransactionId: webhookModel.merchantTransactionId,
+    });
 
     return webhookModel;
   } catch (error) {

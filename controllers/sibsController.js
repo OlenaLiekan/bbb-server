@@ -1,12 +1,12 @@
 const ApiError = require('../error/ApiError');
-const { PaymentInformation, UserOrder, OrderItem, UserAddress } = require('../models/models');
+const { PaymentInformation, PendingWebhook } = require('../models/models');
 const sibs = require('../sibs');
-const email = require('../sendEmail');
-const { options } = require('../db');
+const { processPaymentWebhook } = require('../services/paymentService');
 const ordersInMemory = {};
 
 class SIBSController {
   async Form(req, res, next) {
+    console.log('[SIBSController] SIBS Form called, orderNumber:', req.body.orderNumber);
     const {
       userEmail,
       userName,
@@ -59,6 +59,7 @@ class SIBSController {
   }
 
   async FormHandler(req, res, next) {
+    console.log('[SIBSController] FormHandler called, query:', req.query);
     const { id, resourcePath, orderId } = req.query;
     const orderData = ordersInMemory[orderId];
 
@@ -106,6 +107,7 @@ class SIBSController {
   }
 
   async SaveOrder(req, res) {
+    console.log('[SIBSController] SaveOrder called, orderId:', req.body.orderId);
     const { orderId } = req.body;
 
     ordersInMemory[orderId] = req.body;
@@ -114,154 +116,47 @@ class SIBSController {
   }
 
   async Confirmed(req, res) {
+    console.log('[SIBSController] Webhook Confirmed received, headers:', req.headers);
+    let webhookModel;
     try {
-      const webhookModel = await sibs.webhook(req);
+      webhookModel = await sibs.webhook(req);
 
       if (!webhookModel) {
-        return res.status(500).json({ message: 'Erro ao processar o conteúdo do webhook.' });
+        return res.status(400).json({ message: '[webhookModel] Invalid webhook data' });
       }
 
-      const order = await PaymentInformation.findOne({
-        where: { transactionID: webhookModel.transactionID },
-      });
+      console.log(
+        `[sibsController] Processing webhook for transaction: ${webhookModel.transactionID}, status: ${webhookModel.paymentStatus}`
+      );
 
-      if (order) {
-        order.paymentStatus = webhookModel.paymentStatus;
-        await order.save();
+      try {
+        await processPaymentWebhook(webhookModel);
+      } catch (processingError) {
+        console.error(
+          `[sibsController] Processing failed, saving to pending: ${processingError.message}`
+        );
 
-        if (webhookModel.paymentStatus === 'Success') {
-          try {
-            if (webhookModel.paymentMethod === 'REFERENCE') {
-              webhookModel.paymentReference = {
-                reference: order.reference,
-                entity: order.entity,
-              };
-            }
+        await PendingWebhook.create({
+          transactionID: webhookModel.transactionID,
+          payload: JSON.stringify(webhookModel),
+          paymentStatus: webhookModel.paymentStatus,
+          paymentMethod: webhookModel.paymentMethod,
+          errorReason: processingError.message,
+        });
 
-            const userOrder = await UserOrder.findOne({
-              where: { orderNumber: order.orderID },
-              include: [
-                {
-                  model: OrderItem,
-                  as: 'item',
-                },
-              ],
-            });
-
-            if (!userOrder || !userOrder.item || userOrder.item.length === 0) {
-              throw new Error('Nenhum item encontrado para este pedido.');
-            }
-
-            const orderItems = userOrder.item.map(orderItem => {
-              const descriptionLines = orderItem.description.split('\n');
-              const priceIndex = descriptionLines.findIndex(line => line.startsWith('Preço:'));
-              const hasOptions = descriptionLines.some(line => line.startsWith('Opções:'));
-
-              const descriptionObject = {
-                name: orderItem.title,
-                company: descriptionLines[0].replace('Marca: ', ''),
-                code: descriptionLines[1].replace('Código: ', ''),
-                price: parseFloat(
-                  descriptionLines[priceIndex].replace('Preço: ', '').replace(' €', '')
-                ).toFixed(2),
-                count: parseInt(
-                  descriptionLines[descriptionLines.length - 1].replace('Quantidade: ', '')
-                ),
-                isLashes: hasOptions,
-                info: {},
-              };
-
-              descriptionLines.slice(2, priceIndex).forEach(line => {
-                const cleanLine = line.startsWith(',') ? line.slice(1).trim() : line.trim();
-                if (line.startsWith('Opções:')) {
-                  const options = cleanLine.replace('Opções: ', '').split(' / ');
-                  descriptionObject.curlArr = options[0];
-                  descriptionObject.thicknessArr = options[1];
-                  descriptionObject.lengthArr = options[2];
-                } else {
-                  const [title, description] = cleanLine.split(':').map(part => part.trim());
-                  descriptionObject.info[title] = description;
-                }
-              });
-
-              return descriptionObject;
-            });
-
-            const totalCount = orderItems.reduce((total, item) => total + item.count, 0);
-            const deliveryPrice = userOrder.deliveryPrice;
-            const totalPrice = userOrder.sum;
-            const promocodeName = userOrder.promocodeName;
-            const promocodeValue = userOrder.promocodeValue;
-            const orderHTML = email.formatOrderToHTML(
-              orderItems,
-              totalCount,
-              deliveryPrice,
-              totalPrice,
-              promocodeName,
-              promocodeValue
-            );
-            const customerAddress = await UserAddress.findOne({
-              where: {
-                email: order.customerEmail,
-                mainAddress: true,
-              },
-            });
-
-            if (!customerAddress) {
-              throw new Error('Nenhum Cliente encontrado para este pedido.');
-            }
-
-            if (webhookModel.paymentMethod === 'REFERENCE') {
-              await email.referencePaidEmail(
-                customerAddress.email,
-                customerAddress.firstName,
-                customerAddress.lastName,
-                order.orderID,
-                customerAddress.company,
-                `Rua: ${customerAddress.firstAddress}, Número da porta: ${customerAddress.secondAddress}, Código postal/ZIP: ${customerAddress.postalCode}, ${customerAddress.city}, ${customerAddress.region}, ${customerAddress.country}`,
-                userOrder.userComment,
-                customerAddress.phone,
-                webhookModel.paymentStatus
-              );
-
-              await email.sendEmailToStore(
-                customerAddress.email,
-                customerAddress.firstName,
-                customerAddress.lastName,
-                order.orderID,
-                customerAddress.company,
-                `Rua: ${customerAddress.firstAddress}, Número da porta: ${customerAddress.secondAddress}, Código postal/ZIP: ${customerAddress.postalCode}, ${customerAddress.city}, ${customerAddress.region}, ${customerAddress.country}`,
-                userOrder.userComment,
-                customerAddress.phone,
-                orderHTML
-              );
-            } else {
-              email.sendCompletedEmail(
-                customerAddress.email,
-                customerAddress.firstName,
-                customerAddress.lastName,
-                order.orderID,
-                customerAddress.company,
-                `Rua: ${customerAddress.firstAddress}, Número da porta: ${customerAddress.secondAddress}, Código postal/ZIP: ${customerAddress.postalCode}, ${customerAddress.city}, ${customerAddress.region}, ${customerAddress.country}`,
-                userOrder.userComment,
-                customerAddress.phone,
-                orderHTML,
-                webhookModel
-              );
-            }
-          } catch (error) {
-            console.error(`Erro durante o processamento do email: ${error.message}`);
-          }
-        }
+        throw processingError;
       }
 
       return res.json(sibs.generateWebhookResponse(webhookModel));
     } catch (error) {
-      return res.status(500).json({ message: 'Erro no processamento do webhook.' });
+      console.error('[webhookModel] Error in webhook processing:', error);
+      // Always respond with 200 SIBS to prevent them from sending the webhook again.
+      return res.status(200).json(sibs.generateWebhookResponse(webhookModel));
     }
   }
 
   async checkPayment(req, res, next) {
+    console.log('[SIBSController] checkPayment called, transactionID:', req.body.transactionID);
     try {
       const { transactionID } = req.body;
 

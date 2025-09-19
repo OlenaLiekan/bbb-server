@@ -217,6 +217,24 @@ const PaymentInformation = sequelize.define(
   }
 );
 
+const PendingWebhook = sequelize.define(
+  'pending_webhook',
+  {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    transactionID: { type: DataTypes.STRING, allowNull: false },
+    payload: { type: DataTypes.TEXT, allowNull: false },
+    paymentStatus: { type: DataTypes.STRING, allowNull: false },
+    paymentMethod: { type: DataTypes.STRING, allowNull: false },
+    retryCount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+    errorReason: { type: DataTypes.STRING, allowNull: true },
+    processedAt: { type: DataTypes.DATE, allowNull: true },
+    lastError: { type: DataTypes.TEXT, allowNull: true },
+  },
+  {
+    tableName: 'pending_webhooks',
+  }
+);
+
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
@@ -319,4 +337,5 @@ module.exports = {
   Promotion,
   UserPromocode,
   PaymentInformation,
+  PendingWebhook,
 };
