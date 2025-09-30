@@ -6,6 +6,7 @@ const getRawBody = require('raw-body');
 const { Op } = require('sequelize');
 
 const SIBSForm = async (
+  userId,
   to,
   name,
   surname,
@@ -26,11 +27,15 @@ const SIBSForm = async (
       throw new Error('Parâmetros faltando');
     }
 
-    const foundCustomer = await User.findOne({
-      where: { email: to },
+    /*const foundCustomer = await User.findOne({
+      where: { id: userId },
     });
 
     if (!foundCustomer) {
+      throw new Error('Cliente não encontrado');
+    }*/
+
+    if (!userId) {
       throw new Error('Cliente não encontrado');
     }
 
@@ -48,7 +53,7 @@ const SIBSForm = async (
     const postalCodeLower = postalCode.toLowerCase();
     const existingAddress = await UserAddress.findOne({
       where: {
-        userId: foundCustomer.id,
+        userId: userId,
         firstAddress: { [Op.iLike]: firstAddressLower },
         city: { [Op.iLike]: cityLower },
         postalCode: { [Op.iLike]: postalCodeLower },
@@ -57,7 +62,7 @@ const SIBSForm = async (
 
     const existingMainAddress = await UserAddress.findOne({
       where: {
-        userId: foundCustomer.id,
+        userId: userId,
         mainAddress: true,
       },
     });
@@ -84,7 +89,7 @@ const SIBSForm = async (
         country: addressParts[4],
         postalCode: postalCode,
         mainAddress: true,
-        userId: foundCustomer.id,
+        userId: userId,
       });
     }
 
@@ -157,6 +162,7 @@ const SIBSForm = async (
         startTime: new Date(),
         orderAddress: `${addressParts[0]}, ${addressParts[1]}, ${postalCode}, ${addressParts[2]}, ${addressParts[3]}, ${addressParts[4]}`,
         customerPhone: phone,
+        userId: userId,
       });
 
       return {

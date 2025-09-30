@@ -8,6 +8,7 @@ class SIBSController {
   async Form(req, res, next) {
     console.log('[SIBSController] SIBS Form called, orderNumber:', req.body.orderNumber);
     const {
+      userId,
       userEmail,
       userName,
       userSurname,
@@ -24,6 +25,7 @@ class SIBSController {
     } = req.body;
     try {
       const paymentResponse = await sibs.SIBSForm(
+        userId,
         userEmail,
         userName,
         userSurname,

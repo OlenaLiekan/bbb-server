@@ -213,6 +213,7 @@ const PaymentInformation = sequelize.define(
     entity: { type: DataTypes.STRING, allowNull: true },
     orderAddress: { type: DataTypes.STRING, allowNull: true },
     customerPhone: { type: DataTypes.STRING, allowNull: false },
+    userId: { type: DataTypes.INTEGER, allowNull: false },
   },
   {
     timestamps: false,
