@@ -116,6 +116,12 @@ async function sendSuccessEmails(order, webhookModel) {
       throw new Error('Nenhum Cliente encontrado para este pedido.');
     }
 
+    /*if (!order) {
+      throw new Error('Não é possível encontrar os detalhes do pedido para enviar o e-mail.');
+    }
+
+    const customerAddress = order;*/
+
     if (webhookModel.paymentMethod === 'REFERENCE') {
       await email.referencePaidEmail(
         customerAddress.email,

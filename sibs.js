@@ -163,6 +163,7 @@ const SIBSForm = async (
         orderAddress: `${addressParts[0]}, ${addressParts[1]}, ${postalCode}, ${addressParts[2]}, ${addressParts[3]}, ${addressParts[4]}`,
         customerPhone: phone,
         userId: userId,
+        customerCompany: company || null,
       });
 
       return {
