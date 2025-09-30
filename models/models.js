@@ -211,6 +211,8 @@ const PaymentInformation = sequelize.define(
     phoneNumber: { type: DataTypes.STRING, allowNull: true },
     reference: { type: DataTypes.STRING, allowNull: true },
     entity: { type: DataTypes.STRING, allowNull: true },
+    orderAddress: { type: DataTypes.STRING, allowNull: true },
+    customerPhone: { type: DataTypes.STRING, allowNull: false },
   },
   {
     timestamps: false,

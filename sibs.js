@@ -155,6 +155,8 @@ const SIBSForm = async (
         customerEmail: to,
         amount: jsonResponse.amount.value,
         startTime: new Date(),
+        orderAddress: `${addressParts[0]}, ${addressParts[1]}, ${postalCode}, ${addressParts[2]}, ${addressParts[3]}, ${addressParts[4]}`,
+        customerPhone: phone,
       });
 
       return {
