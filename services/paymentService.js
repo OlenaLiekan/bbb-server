@@ -105,7 +105,8 @@ async function sendSuccessEmails(order, webhookModel) {
       promocodeName,
       promocodeValue
     );
-    const customerAddress = await UserAddress.findOne({
+
+    /*const customerAddress = await UserAddress.findOne({
       where: {
         email: order.customerEmail,
         mainAddress: true,
@@ -114,48 +115,66 @@ async function sendSuccessEmails(order, webhookModel) {
 
     if (!customerAddress) {
       throw new Error('Nenhum Cliente encontrado para este pedido.');
-    }
+    }*/
 
-    /*if (!order) {
+    if (!order) {
       throw new Error('Não é possível encontrar os detalhes do pedido para enviar o e-mail.');
     }
 
-    const customerAddress = order;*/
+    const customerAddress = order;
 
     if (webhookModel.paymentMethod === 'REFERENCE') {
       await email.referencePaidEmail(
-        customerAddress.email,
-        customerAddress.firstName,
-        customerAddress.lastName,
+        customerAddress.customerEmail,
+        customerAddress.customerName.split(' ')[0],
+        customerAddress.customerName.split(' ').slice(1).join(' '),
         order.orderID,
-        customerAddress.company,
-        `Rua: ${customerAddress.firstAddress}, Número da porta: ${customerAddress.secondAddress}, Código postal/ZIP: ${customerAddress.postalCode}, ${customerAddress.city}, ${customerAddress.region}, ${customerAddress.country}`,
+        customerAddress.customerCompany,
+        `Rua: ${customerAddress.orderAddress.split(', ')[0]}, Número da porta: ${
+          customerAddress.orderAddress.split(', ')[1]
+        }, Código postal/ZIP: ${customerAddress.orderAddress.split(', ')[2]}, ${
+          customerAddress.orderAddress.split(', ')[3]
+        }, ${customerAddress.orderAddress.split(', ')[4]}, ${
+          customerAddress.orderAddress.split(', ')[5]
+        }`,
         userOrder.userComment,
-        customerAddress.phone,
+        customerAddress.customerPhone,
         webhookModel.paymentStatus
       );
 
       await email.sendEmailToStore(
-        customerAddress.email,
-        customerAddress.firstName,
-        customerAddress.lastName,
+        customerAddress.customerEmail,
+        customerAddress.customerName.split(' ')[0],
+        customerAddress.customerName.split(' ').slice(1).join(' '),
         order.orderID,
-        customerAddress.company,
-        `Rua: ${customerAddress.firstAddress}, Número da porta: ${customerAddress.secondAddress}, Código postal/ZIP: ${customerAddress.postalCode}, ${customerAddress.city}, ${customerAddress.region}, ${customerAddress.country}`,
+        customerAddress.customerCompany,
+        `Rua: ${customerAddress.orderAddress.split(', ')[0]}, Número da porta: ${
+          customerAddress.orderAddress.split(', ')[1]
+        }, Código postal/ZIP: ${customerAddress.orderAddress.split(', ')[2]}, ${
+          customerAddress.orderAddress.split(', ')[3]
+        }, ${customerAddress.orderAddress.split(', ')[4]}, ${
+          customerAddress.orderAddress.split(', ')[5]
+        }`,
         userOrder.userComment,
-        customerAddress.phone,
+        customerAddress.customerPhone,
         orderHTML
       );
     } else {
       email.sendCompletedEmail(
-        customerAddress.email,
-        customerAddress.firstName,
-        customerAddress.lastName,
+        customerAddress.customerEmail,
+        customerAddress.customerName.split(' ')[0],
+        customerAddress.customerName.split(' ').slice(1).join(' '),
         order.orderID,
-        customerAddress.company,
-        `Rua: ${customerAddress.firstAddress}, Número da porta: ${customerAddress.secondAddress}, Código postal/ZIP: ${customerAddress.postalCode}, ${customerAddress.city}, ${customerAddress.region}, ${customerAddress.country}`,
+        customerAddress.customerCompany,
+        `Rua: ${customerAddress.orderAddress.split(', ')[0]}, Número da porta: ${
+          customerAddress.orderAddress.split(', ')[1]
+        }, Código postal/ZIP: ${customerAddress.orderAddress.split(', ')[2]}, ${
+          customerAddress.orderAddress.split(', ')[3]
+        }, ${customerAddress.orderAddress.split(', ')[4]}, ${
+          customerAddress.orderAddress.split(', ')[5]
+        }`,
         userOrder.userComment,
-        customerAddress.phone,
+        customerAddress.customerPhone,
         orderHTML,
         webhookModel
       );
