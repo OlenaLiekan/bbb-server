@@ -124,7 +124,11 @@ class SIBSController {
       webhookModel = await sibs.webhook(req);
 
       if (!webhookModel) {
-        return res.status(400).json({ message: '[webhookModel] Invalid webhook data' });
+        console.error('[SIBSController] Invalid webhook data received');
+        return res.status(200).json({
+          result: false,
+          message: 'Invalid webhook data',
+        });
       }
 
       console.log(
@@ -145,15 +149,20 @@ class SIBSController {
           paymentMethod: webhookModel.paymentMethod,
           errorReason: processingError.message,
         });
-
-        throw processingError;
       }
 
       return res.json(sibs.generateWebhookResponse(webhookModel));
     } catch (error) {
-      console.error('[webhookModel] Error in webhook processing:', error);
-      // Always respond with 200 SIBS to prevent them from sending the webhook again.
-      return res.status(200).json(sibs.generateWebhookResponse(webhookModel));
+      console.error('[SIBSController] Critical error in webhook processing:', error);
+
+      let response;
+      if (webhookModel && sibs && typeof sibs.generateWebhookResponse === 'function') {
+        response = res.json(sibs.generateWebhookResponse(webhookModel));
+      } else {
+        response = res.status(200).json({ result: false, message: 'Webhook processing failed' });
+      }
+
+      return response;
     }
   }
 

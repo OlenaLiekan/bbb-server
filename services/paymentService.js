@@ -180,7 +180,7 @@ async function sendSuccessEmails(order, webhookModel) {
       );
     }
   } catch (emailError) {
-    console.error(`[sendEmail] Email sending failed:: ${emailError.message}`);
+    console.error(`[sendEmail] Email sending failed: ${emailError.message}`);
     throw error;
   }
 }

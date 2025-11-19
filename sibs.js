@@ -243,6 +243,7 @@ const checkPaymentStatus = async id => {
 };
 
 async function processPayment(orderData, paymentStatus) {
+  console.log('[processPayment] started...');
   const clientEmail = orderData.clientEmail;
   const clientName = orderData.clientName;
   const clientSurname = orderData.clientSurname;
