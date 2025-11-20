@@ -215,6 +215,9 @@ const PaymentInformation = sequelize.define(
     customerPhone: { type: DataTypes.STRING, allowNull: false },
     userId: { type: DataTypes.INTEGER, allowNull: false },
     customerCompany: { type: DataTypes.STRING, allowNull: true },
+    sentToClient: { type: DataTypes.STRING, allowNull: true },
+    sentToShop: { type: DataTypes.STRING, allowNull: true },
+    sentReferencePaid: { type: DataTypes.STRING, allowNull: true },
   },
   {
     timestamps: false,
