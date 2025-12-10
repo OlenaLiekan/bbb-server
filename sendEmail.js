@@ -233,11 +233,11 @@ function formatOrderToHTML(
             </div>
           </td>
           <td width="58%" style="vertical-align: top; padding: 5px 0;">
-            <div style="font-size: 14px; color: #252525; margin-bottom: 4px;">
+            <div style="font-size: 14px; color: #252525; margin-bottom: 4px; text-align: left;">
               <b>${item.name} ${item.company}</b>
               <b style="white-space: nowrap;"> (${item.code}) x ${item.count}</b>
             </div>
-            <div style="color: #666666; font-size: 12px; line-height: 1.4;">
+            <div style="color: #666666; font-size: 12px; line-height: 1.4; text-align: left;">
               ${detailsHTML || ''}
             </div>
             ${item.code === '123' ? promoLine : ''}
