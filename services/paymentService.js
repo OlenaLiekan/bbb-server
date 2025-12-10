@@ -74,6 +74,7 @@ async function sendSuccessEmails(order, webhookModel) {
         count: parseInt(descriptionLines[descriptionLines.length - 1].replace('Quantidade: ', '')),
         isLashes: hasOptions,
         info: {},
+        img: orderItem.img,
       };
 
       descriptionLines.slice(2, priceIndex).forEach(line => {
@@ -105,17 +106,6 @@ async function sendSuccessEmails(order, webhookModel) {
       promocodeName,
       promocodeValue
     );
-
-    /*const customerAddress = await UserAddress.findOne({
-      where: {
-        email: order.customerEmail,
-        mainAddress: true,
-      },
-    });
-
-    if (!customerAddress) {
-      throw new Error('Nenhum Cliente encontrado para este pedido.');
-    }*/
 
     if (!order) {
       throw new Error('Não é possível encontrar os detalhes do pedido para enviar o e-mail.');

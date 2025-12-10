@@ -182,25 +182,80 @@ function formatOrderToHTML(
     .map((item, index) => {
       let detailsHTML = '';
 
+      const productImage = `
+        <img style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: cover;" src='https://res.cloudinary.com/bbbptcloud/image/upload/v1699129130/static/${item.img}' alt='product'/>
+      `;
+
+      const promoLine = `
+        <svg
+          style="width: 10px; height: 10px; transform: scaleX(-1); fill: #9e9e9eff;"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path d="M0 252.118V48C0 21.49 21.49 0 48 0h204.118a48 48 0 0 1 33.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137 0 67.882L293.823 497.941c-18.745 18.745-49.137 18.745-67.882 0L14.059 286.059A48 48 0 0 1 0 252.118zM112 64c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48z" />
+        </svg>
+        <span style="color: #5c5c5cff; font-size: 14px;">
+          ${promocodeName && promocodeName}
+        </span>
+        <span style="color: #5c5c5cff; font-size: 14px;">
+          (-0.01€)
+        </span>
+      `;
+
       if (item.isLashes) {
-        detailsHTML += `Curvatura: ${item.curlArr}<br>Grossura: ${item.thicknessArr} mm<br>Tamanho: ${item.lengthArr} mm<br>`;
+        detailsHTML += `<span style="color: #666666; font-size: 12px; line-height: 1.4;">
+        ${item.curlArr ? item.curlArr + (item.thicknessArr || item.lengthArr ? ' / ' : '') : ''}
+        ${item.thicknessArr ? item.thicknessArr + ' mm' + (item.lengthArr ? ' / ' : '') : ''}
+        ${item.lengthArr ? item.lengthArr + ' mm' : ''}
+        </span><br>`;
       }
 
-      if (Object.keys(item.info).length > 0) {
+      if (item.info && Object.keys(item.info).length > 0) {
+        let values = [];
         Object.entries(item.info).forEach(([key, value]) => {
-          detailsHTML += `${key}: ${value}<br>`;
+          values = [...values, value];
         });
+        detailsHTML = values ? values.join(' / ') : '';
       }
 
-      return (
-        (index > 0 ? '<br><br>' : '') +
-        `<b>${index + 1}. ${item.name}</b><br>` +
-        `Marca: ${item.company}<br>` +
-        `Código: ${item.code}<br>` +
-        detailsHTML +
-        `Preço: ${item.price} €<br>` +
-        `Quantidade: ${item.count}`
-      );
+      const productHTML = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif;">
+            <tr>
+            <td width="10%" style="vertical-align: top;">
+            <div style="position: relative; width: 45px; height: 45px; border-radius: 10px; overflow: hidden; margin-right: 10px;">
+              ${item.img ? productImage : ''}            
+            </div>
+            </td>
+                <td width="58%" style="vertical-align: top; padding: 0; font-size: 14px; color: #252525;">
+                <b>${item.name} ${item.company}</b>
+                <b style="white-space: nowrap;">(${item.code}) x ${item.count}</b>
+                </td>
+              <td width="32%" style="vertical-align: bottom; text-align: right; padding-top: 3px; font-size: 16px; color: #252525;">
+                <b>${(item.price * item.count).toFixed(2)} €</b>
+              </td>
+            </tr>
+            <tr>
+            <td width="10%" style="height="1";>&nbsp;</td>
+              <td width="58%" style="vertical-align: bottom; padding-top: 5px; color: #666666; font-size: 12px; line-height: 1.4;""> 
+                  ${detailsHTML ? detailsHTML : ''} 
+              </td>
+                <td width="32%" style="vertical-align: top; text-align: right; padding: 0; font-size: 14px; color: #939393ff; text-decoration: line-through;">
+                <b>${item.code === '123' ? (item.price * item.count).toFixed(2) + ' €' : ''}</b>
+              </td>
+            </tr>
+            <tr>
+              <td width="10%" style="height="1";>&nbsp;</td>
+              <td width="58%" style="vertical-align: top; padding-top: 10px; height="1";>
+                ${item.code === '123' ? promoLine : ''}
+              </td>
+            </tr>
+        </table>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 15px 0;">
+          <tr>
+            <td height="1" bgcolor="#eeeeee" style="font-size: 1.5px; line-height: 1px;">&nbsp;</td>
+          </tr>
+        </table>`;
+
+      return productHTML;
     })
     .join('');
 
