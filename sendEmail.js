@@ -123,19 +123,26 @@ const sendEmailToStore = async (
         to: user,
         from: `Best Buy Beauty ${user}`,
         subject: `Novo pedido № ${orderNumber}`,
-        html: `			
-                <h2 style='color: #252525;'>Olá, Svitlana!</h2>
-                <h3 style='color: #AD902B; border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Detalhes do novo pedido № ${orderNumber}</h3> 
-                <div>
-                    <b>Envio para o domicílio</b>
+        html: `	<div style='background-color: #f6f6f6; padding: 30px 0;'>
+                  <div style='letter-spacing: 0.5px; text-align: center; padding: 15px; background-color: #fff; width: 280px; margin: auto;'>
+                    <h2 style='color: #252525;'>Olá, Svitlana!</h2>
+                    <div>
+                      <h3 style='color: #AD902B; border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
+                        Detalhes do novo pedido № ${orderNumber}
+                      </h3> 
+                      <div>
+                          <b>Envio para o domicílio</b>
+                      </div>
+                      <p>${name} ${surname}</p>
+                      <p>${company}</p>
+                      <p>${address}</p>
+                      <p>Tel. ${phone}</p>
+                      <p>E-mail ${to}</p>
+                      <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Um comentário: ${comment}</p>
+                      <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>${order}</div>
+                    </div>
+                  </div>
                 </div>
-                <p>${name} ${surname}</p>
-                <p>${company}</p>
-                <p>${address}</p>
-                <p>Tel. ${phone}</p>
-                <p>E-mail ${to}</p>
-                <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Um comentário: ${comment}</p>
-                <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>${order}</div>
             `,
       };
       const result = await transporter.sendMail(newOrder);
@@ -182,30 +189,30 @@ function formatOrderToHTML(
     .map((item, index) => {
       let detailsHTML = '';
 
-      const productImage = `
-        <img style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: cover;" src='https://res.cloudinary.com/bbbptcloud/image/upload/v1699129130/static/${item.img}' alt='product'/>
-      `;
+      const productImage = `<img style="width: 100%; height: 100%; border-radius: 10px; object-fit: cover;" src='https://res.cloudinary.com/bbbptcloud/image/upload/v1699129130/static/${item.img}' alt='product'/>`;
 
-      const promoLine = `
-        <svg
-          style="width: 10px; height: 10px; transform: scaleX(-1); fill: #9e9e9eff;"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <path d="M0 252.118V48C0 21.49 21.49 0 48 0h204.118a48 48 0 0 1 33.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137 0 67.882L293.823 497.941c-18.745 18.745-49.137 18.745-67.882 0L14.059 286.059A48 48 0 0 1 0 252.118zM112 64c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48z" />
-        </svg>
-        <span style="color: #5c5c5cff; font-size: 14px;">
-          ${promocodeName && promocodeName}
-        </span>
-        <span style="color: #5c5c5cff; font-size: 14px;">
-          (-0.01€)
-        </span>
-      `;
+      const promoLine = `<div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
+                    <svg
+                      style="width: 10px; height: 10px; transform: scaleX(-1); fill: #9e9e9eff;"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 512 512"
+                    >
+                      <path d="M0 252.118V48C0 21.49 21.49 0 48 0h204.118a48 48 0 0 1 33.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137 0 67.882L293.823 497.941c-18.745 18.745-49.137 18.745-67.882 0L14.059 286.059A48 48 0 0 1 0 252.118zM112 64c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48z" />
+                    </svg>
+                    <span style="color: #5c5c5cff; font-size: 14px;">
+                      ${promocodeName || ''}
+                    </span>
+                    <span style="color: #5c5c5cff; font-size: 14px;">
+                      (-0.01€)
+                    </span>
+                  </div>`;
 
       if (item.isLashes) {
         detailsHTML += `<span style="color: #666666; font-size: 12px; line-height: 1.4;">
-        ${item.curlArr ? item.curlArr + (item.thicknessArr || item.lengthArr ? ' / ' : '') : ''}
-        ${item.thicknessArr ? item.thicknessArr + ' mm' + (item.lengthArr ? ' / ' : '') : ''}
+        ${item.curlArr || ''}${item.curlArr && (item.thicknessArr || item.lengthArr) ? ' / ' : ''}
+        ${item.thicknessArr ? item.thicknessArr + ' mm' : ''}${
+          item.thicknessArr && item.lengthArr ? ' / ' : ''
+        }
         ${item.lengthArr ? item.lengthArr + ' mm' : ''}
         </span><br>`;
       }
@@ -213,69 +220,91 @@ function formatOrderToHTML(
       if (item.info && Object.keys(item.info).length > 0) {
         let values = [];
         Object.entries(item.info).forEach(([key, value]) => {
-          values = [...values, value];
+          values.push(value);
         });
         detailsHTML = values ? values.join(' / ') : '';
       }
 
       const productHTML = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif;">
-            <tr>
-            <td width="10%" style="vertical-align: top;">
-            <div style="position: relative; width: 45px; height: 45px; border-radius: 10px; overflow: hidden; margin-right: 10px;">
+        <tr>
+          <td width="10%" style="vertical-align: top; padding-top: 5px;">
+            <div style="position: relative; width: 45px; height: 45px; border-radius: 10px; background-color: #ffffff; margin-right: 10px;">
               ${item.img ? productImage : ''}            
             </div>
-            </td>
-                <td width="58%" style="vertical-align: top; padding: 0; font-size: 14px; color: #252525;">
-                <b>${item.name} ${item.company}</b>
-                <b style="white-space: nowrap;">(${item.code}) x ${item.count}</b>
-                </td>
-              <td width="32%" style="vertical-align: bottom; text-align: right; padding-top: 3px; font-size: 16px; color: #252525;">
+          </td>
+          <td width="58%" style="vertical-align: top; padding: 5px 0;">
+            <div style="font-size: 14px; color: #252525; margin-bottom: 4px;">
+              <b>${item.name} ${item.company}</b>
+              <b style="white-space: nowrap;"> (${item.code}) x ${item.count}</b>
+            </div>
+            <div style="color: #666666; font-size: 12px; line-height: 1.4;">
+              ${detailsHTML || ''}
+            </div>
+            ${item.code === '123' ? promoLine : ''}
+          </td>
+          <td width="32%" style="vertical-align: top; text-align: right;">
+            <div style="padding-top: 5px;">
+              <div style="font-size: 16px; color: #252525; margin-bottom: 4px;">
                 <b>${(item.price * item.count).toFixed(2)} €</b>
-              </td>
-            </tr>
-            <tr>
-            <td width="10%" style="height="1";>&nbsp;</td>
-              <td width="58%" style="vertical-align: bottom; padding-top: 5px; color: #666666; font-size: 12px; line-height: 1.4;""> 
-                  ${detailsHTML ? detailsHTML : ''} 
-              </td>
-                <td width="32%" style="vertical-align: top; text-align: right; padding: 0; font-size: 14px; color: #939393ff; text-decoration: line-through;">
+              </div>
+              <div style="font-size: 14px; color: #939393; text-decoration: line-through;">
                 <b>${item.code === '123' ? (item.price * item.count).toFixed(2) + ' €' : ''}</b>
-              </td>
-            </tr>
-            <tr>
-              <td width="10%" style="height="1";>&nbsp;</td>
-              <td width="58%" style="vertical-align: top; padding-top: 10px; height="1";>
-                ${item.code === '123' ? promoLine : ''}
-              </td>
-            </tr>
-        </table>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 15px 0;">
-          <tr>
-            <td height="1" bgcolor="#eeeeee" style="font-size: 1.5px; line-height: 1px;">&nbsp;</td>
-          </tr>
-        </table>`;
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 15px 0;">
+        <tr>
+          <td height="1" bgcolor="#eeeeee" style="font-size: 1.5px; line-height: 1px;">&nbsp;</td>
+        </tr>
+      </table>`;
 
       return productHTML;
     })
     .join('');
 
-  const orderSummary =
-    '<br><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Quantidade total: </span>' +
-    totalCount +
-    '</b><br><b style="font-size: 110%; padding-bottom: 20px;"><span style="padding-right: 10px;">Custo de entrega: </span>' +
-    deliveryPrice +
-    ' €</b>' +
-    (promocodeName && promocodeValue
-      ? '<br><br><b style="font-size: 110%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Desconto: </span>' +
-        '- ' +
-        promocodeValue +
-        '%  ' +
-        promocodeName +
-        '</b>'
-      : '') +
-    '<br><br><b style="font-size: 125%; color: #AD902B; padding-bottom: 20px;"><span style="padding-right: 10px;">Valor total: </span>' +
-    totalPrice +
-    ' €</b>';
+  const orderSummary = `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; margin-top: 20px;">
+      <tr>
+        <td style="padding-bottom: 10px;">
+          <b style="font-size: 110%;">
+            <span style="padding-right: 10px;">Quantidade total:</span>
+            ${totalCount}
+          </b>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-bottom: 10px;">
+          <b style="font-size: 110%;">
+            <span style="padding-right: 10px;">Custo de entrega:</span>
+            ${deliveryPrice} €
+          </b>
+        </td>
+      </tr>
+      ${
+        promocodeName && promocodeValue
+          ? `
+      <tr>
+        <td style="padding-bottom: 10px;">
+          <b style="font-size: 110%; color: #AD902B;">
+            <span style="padding-right: 10px;">Desconto:</span>
+            - ${promocodeValue}% ${promocodeName}
+          </b>
+        </td>
+      </tr>
+      `
+          : ''
+      }
+      <tr>
+        <td style="padding-top: 10px; border-top: 1px solid #eeeeee;">
+          <b style="font-size: 125%; color: #AD902B;">
+            <span style="padding-right: 10px;">Valor total:</span>
+            ${totalPrice} €
+          </b>
+        </td>
+      </tr>
+    </table>`;
 
   return formattedOrder + orderSummary;
 }
