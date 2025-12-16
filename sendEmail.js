@@ -25,22 +25,51 @@ const sendEmailToClient = async (
   postalCode,
   comment,
   phone,
-  order,
+  orderHTML,
   paymentList
 ) => {
   console.log('[sendEmail] sendEmailToClient called for order:', orderNumber);
 
+  let refOptions = {
+    where: {
+      orderID: orderNumber,
+      paymentMethod: 'REFERENCE',
+      paymentStatus: 'Pending',
+    },
+  };
+
+  let options = {
+    where: {
+      orderID: orderNumber,
+      paymentStatus: 'Success',
+    },
+  };
+
+  const comfirmedOrder = await PaymentInformation.findOne(refOptions ? refOptions : options);
+  const duplicate = comfirmedOrder ? comfirmedOrder.sentToClient : null;
+
   if (!to || !name || !orderNumber) {
-    console.error('[sendEmail] Email missing required fields: to, name or orderNumber');
-    return;
+    const error = new Error('[sendEmail] sendEmailToClient missing required fields');
+    console.error(error.message);
+    if (comfirmedOrder) {
+      let props = {};
+      props = { ...props, sentToClient: 'Failed', sentToShop: 'Failed' };
+      await PaymentInformation.update(props, options);
+    } else {
+      console.log(
+        `[sendEmail] There is no order ${orderNumber} with a pending or successful status. Unable to update the status Failed for sentToClient and sentToShop columns.`
+      );
+    }
+    throw error;
   }
 
-  try {
-    const message = {
-      to,
-      from: `Best Buy Beauty ${user}`,
-      subject: `Detalhes do novo pedido № ${orderNumber}`,
-      html: `
+  if (duplicate !== 'Success') {
+    try {
+      const message = {
+        to,
+        from: `Best Buy Beauty ${user}`,
+        subject: `Detalhes do novo pedido № ${orderNumber}`,
+        html: `
             <div style='background-color: #f6f6f6; padding: 30px 0;'>
                 <div style='letter-spacing: 0.5px; text-align: center; padding: 15px; background-color: #fff; width: 280px; margin: auto;'>
                     <h2 style='color: #252525;'>Olá, ${name}!</h2>
@@ -71,22 +100,53 @@ const sendEmailToClient = async (
                             <p>E-mail ${to}</p>
                             <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Um comentário: ${comment}</p>
                             <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
-                                ${order}
+                              ${orderHTML}
                             </div>                             
                         </div>
                     </div>
                 </div>
             </div>
         `,
-    };
+      };
 
-    const info = await transporter.sendMail(message);
-    console.log('E-mail enviado ao cliente:', info.messageId);
+      const info = await transporter.sendMail(message);
+      console.log('E-mail enviado ao cliente:', info.messageId);
 
-    await sendEmailToStore(to, name, surname, orderNumber, company, address, comment, phone, order);
-  } catch (error) {
-    console.error('Erro ao enviar e-mail para o cliente:', error);
-    throw new Error('Email could not be sent to client');
+      if (comfirmedOrder) {
+        let props = {};
+        props = { ...props, sentToClient: 'Success' };
+        await PaymentInformation.update(props, options);
+      } else {
+        console.log(
+          `[sendEmail] There is no order ${orderNumber} with a pending or successful status. Unable to update the status Success for sentToClient column.`
+        );
+      }
+
+      await sendEmailToStore(
+        to,
+        name,
+        surname,
+        orderNumber,
+        company,
+        address,
+        comment,
+        phone,
+        orderHTML
+      );
+      return info;
+    } catch (error) {
+      console.error('Erro ao enviar e-mail para o cliente:', error);
+      if (comfirmedOrder) {
+        let props = {};
+        props = { ...props, sentToClient: 'Failed' };
+        await PaymentInformation.update(props, options);
+      } else {
+        console.log(
+          `[sendEmailToClient] There is no order ${orderNumber} with a pending or successful status. Unable to update the status Failed for sentToClient column.`
+        );
+      }
+      throw new Error('Email could not be sent to client');
+    }
   }
 };
 
@@ -102,10 +162,6 @@ const sendEmailToStore = async (
   order
 ) => {
   console.log('[sendEmail] sendEmailToStore called for order:', orderNumber);
-  if (!to || !name || !orderNumber) {
-    console.error('[sendEmail] Store email missing required fields');
-    return;
-  }
 
   let options = {
     where: {
@@ -117,14 +173,29 @@ const sendEmailToStore = async (
   const successfulOrder = await PaymentInformation.findOne(options);
   const duplicate = successfulOrder ? successfulOrder.sentToShop : null;
 
+  if (!to || !name || !orderNumber) {
+    const error = new Error('[sendEmail] Store email missing required fields');
+    console.error(error.message);
+    if (successfulOrder) {
+      let props = {};
+      props = { ...props, sentToShop: 'Failed' };
+      await PaymentInformation.update(props, options);
+    } else {
+      console.log(
+        `[sendEmailToStore] There is no order ${orderNumber} with a successful status. Unable to update the status Failed for sentToShop column.`
+      );
+    }
+    throw error;
+  }
+
   if (duplicate !== 'Success') {
     try {
       const newOrder = {
         to: user,
         from: `Best Buy Beauty ${user}`,
         subject: `Novo pedido № ${orderNumber}`,
-        html: `	<div style='background-color: #f6f6f6; padding: 30px 0;'>
-                  <div style='letter-spacing: 0.5px; text-align: center; padding: 15px; background-color: #fff; width: 280px; margin: auto;'>
+        html: `	<div style='background-color: #f6f6f6; padding: 30px;'>
+                  <div style='letter-spacing: 0.5px; text-align: center; padding: 15px; background-color: #fff; width: 280px;'>
                     <h2 style='color: #252525;'>Olá, Svitlana!</h2>
                     <div>
                       <h3 style='color: #AD902B; border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
@@ -323,20 +394,38 @@ const sendCompletedEmail = async (
 ) => {
   console.log('[sendEmail] sendCompletedEmail called for order:', orderNumber);
 
-  if (!to || !name || !orderNumber || !paymentStatus) {
-    console.error('[sendEmail] Completed email missing required fields');
-    return;
-  }
+  let refOptions = {
+    where: {
+      orderID: orderNumber,
+      paymentMethod: 'REFERENCE',
+      paymentStatus: 'Pending',
+    },
+  };
 
   let options = {
     where: {
       orderID: orderNumber,
-      paymentStatus: paymentStatus.paymentMethod === 'REFERENCE' ? 'Pending' : 'Success',
+      paymentStatus: 'Success',
     },
   };
 
-  const existingOrder = await PaymentInformation.findOne(options);
+  const existingOrder = await PaymentInformation.findOne(refOptions ? refOptions : options);
   const duplicate = existingOrder ? existingOrder.sentToClient : null;
+
+  if (!to || !name || !orderNumber || !paymentStatus) {
+    const error = new Error('[sendEmail] Completed email missing required fields');
+    console.error(error.message);
+    if (existingOrder) {
+      let props = {};
+      props = { ...props, sentToClient: 'Failed', sentToShop: 'Failed' };
+      await PaymentInformation.update(props, options);
+    } else {
+      console.log(
+        `[sendCompletedEmail] There is no order ${orderNumber} with a pending or successful status. Unable to update the status Failed for sentToClient column.`
+      );
+    }
+    throw error;
+  }
 
   if (duplicate !== 'Success') {
     let paymentList;
@@ -453,13 +542,10 @@ const referencePaidEmail = async (
   address,
   comment,
   phone,
-  paymentStatus
+  paymentStatus,
+  orderHTML
 ) => {
   console.log('[sendEmail] referencePaidEmail called for order:', orderNumber);
-  if (!to || !name || !orderNumber || !paymentStatus) {
-    console.error('[sendEmail] Reference email missing required fields');
-    return;
-  }
 
   let options = {
     where: {
@@ -470,6 +556,21 @@ const referencePaidEmail = async (
 
   const successfulReference = await PaymentInformation.findOne(options);
   const duplicate = successfulReference ? successfulReference.sentReferencePaid : null;
+
+  if (!to || !name || !orderNumber) {
+    const error = new Error('[sendEmail] Reference paid email missing required fields');
+    console.error(error.message);
+    if (successfulReference) {
+      let props = {};
+      props = { ...props, sentReferencePaid: 'Failed' };
+      await PaymentInformation.update(props, options);
+    } else {
+      console.log(
+        `[referencePaidEmail] There is no order ${orderNumber} with a successful status. Unable to update the status Failed for sentReferencePaid column.`
+      );
+    }
+    throw error;
+  }
 
   if (duplicate !== 'Success') {
     let paymentList = `
@@ -508,6 +609,9 @@ const referencePaidEmail = async (
                       <p style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>Um comentário: ${
                         comment ? comment : 'Sem comentários'
                       }</p>
+                      <div style='border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
+                        ${orderHTML}
+                      </div>
                     </div>
                   </div>
                 </div>

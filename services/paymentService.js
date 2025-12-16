@@ -129,7 +129,8 @@ async function sendSuccessEmails(order, webhookModel) {
         }`,
         userOrder.userComment,
         customerAddress.customerPhone,
-        webhookModel.paymentStatus
+        webhookModel.paymentStatus,
+        orderHTML
       );
 
       await email.sendEmailToStore(
