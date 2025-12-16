@@ -45,7 +45,9 @@ const sendEmailToClient = async (
     },
   };
 
-  const comfirmedOrder = await PaymentInformation.findOne(refOptions ? refOptions : options);
+  const resultRefOrder = await PaymentInformation.findOne(refOptions);
+  const resultOrder = await PaymentInformation.findOne(options);
+  const comfirmedOrder = resultOrder ? resultOrder : resultRefOrder;
   const duplicate = comfirmedOrder ? comfirmedOrder.sentToClient : null;
 
   if (!to || !name || !orderNumber) {
@@ -409,7 +411,9 @@ const sendCompletedEmail = async (
     },
   };
 
-  const existingOrder = await PaymentInformation.findOne(refOptions ? refOptions : options);
+  const completedResult = await PaymentInformation.findOne(options);
+  const completedRefResult = await PaymentInformation.findOne(refOptions);
+  const existingOrder = completedResult ? completedResult : completedRefResult;
   const duplicate = existingOrder ? existingOrder.sentToClient : null;
 
   if (!to || !name || !orderNumber || !paymentStatus) {
