@@ -195,7 +195,7 @@ const sendEmailToStore = async (
         from: `Best Buy Beauty ${user}`,
         subject: `Novo pedido № ${orderNumber}`,
         html: `	<div style='background-color: #f6f6f6; padding: 30px;'>
-                  <div style='letter-spacing: 0.5px; text-align: center; padding: 15px; background-color: #fff; width: 280px;'>
+                  <div style='letter-spacing: 0.5px; text-align: left; padding: 15px; background-color: #fff; width: 280px;'>
                     <h2 style='color: #252525;'>Olá, Svitlana!</h2>
                     <div>
                       <h3 style='color: #AD902B; border-bottom: 2px solid #f6f6f6; padding: 0 0 20px 0;'>
