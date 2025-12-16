@@ -1,4 +1,4 @@
-const { PaymentInformation, UserAddress, User } = require('./models/models');
+const { PaymentInformation, UserAddress, User, UserOrder, OrderItem } = require('./models/models');
 const axios = require('axios');
 const email = require('./sendEmail');
 const crypto = require('crypto');
@@ -254,6 +254,68 @@ async function processPayment(orderData, paymentStatus) {
   const orderDetails = orderData.order;
   const orderId = orderData.orderId;
 
+  const userOrder = await UserOrder.findOne({
+    where: { orderNumber: orderId },
+    include: [
+      {
+        model: OrderItem,
+        as: 'item',
+      },
+    ],
+  });
+
+  if (!userOrder || !userOrder.item || userOrder.item.length === 0) {
+    throw new Error('Nenhum item encontrado para este pedido.');
+  }
+
+  const orderItems = userOrder.item.map(orderItem => {
+    const descriptionLines = orderItem.description.split('\n');
+    const priceIndex = descriptionLines.findIndex(line => line.startsWith('Preço:'));
+    const hasOptions = descriptionLines.some(line => line.startsWith('Opções:'));
+
+    const descriptionObject = {
+      name: orderItem.title,
+      company: descriptionLines[0].replace('Marca: ', ''),
+      code: descriptionLines[1].replace('Código: ', ''),
+      price: parseFloat(
+        descriptionLines[priceIndex].replace('Preço: ', '').replace(' €', '')
+      ).toFixed(2),
+      count: parseInt(descriptionLines[descriptionLines.length - 1].replace('Quantidade: ', '')),
+      isLashes: hasOptions,
+      info: {},
+      img: orderItem.img,
+    };
+
+    descriptionLines.slice(2, priceIndex).forEach(line => {
+      const cleanLine = line.startsWith(',') ? line.slice(1).trim() : line.trim();
+      if (line.startsWith('Opções:')) {
+        const options = cleanLine.replace('Opções: ', '').split(' / ');
+        descriptionObject.curlArr = options[0];
+        descriptionObject.thicknessArr = options[1];
+        descriptionObject.lengthArr = options[2];
+      } else {
+        const [title, description] = cleanLine.split(':').map(part => part.trim());
+        descriptionObject.info[title] = description;
+      }
+    });
+
+    return descriptionObject;
+  });
+
+  const totalCount = orderItems.reduce((total, item) => total + item.count, 0);
+  const deliveryPrice = userOrder.deliveryPrice;
+  const totalPrice = userOrder.sum;
+  const promocodeName = userOrder.promocodeName;
+  const promocodeValue = userOrder.promocodeValue;
+  const orderHTML = email.formatOrderToHTML(
+    orderItems,
+    totalCount,
+    deliveryPrice,
+    totalPrice,
+    promocodeName,
+    promocodeValue
+  );
+
   if (paymentStatus.paymentStatus === 'Success') {
     await email.sendCompletedEmail(
       clientEmail,
@@ -264,7 +326,7 @@ async function processPayment(orderData, paymentStatus) {
       clientAddress,
       clientComment,
       clientPhone,
-      orderDetails,
+      orderHTML,
       paymentStatus
     );
 
@@ -291,7 +353,7 @@ async function processPayment(orderData, paymentStatus) {
       clientAddress,
       clientComment,
       clientPhone,
-      orderDetails,
+      orderHTML,
       paymentStatus
     );
 
