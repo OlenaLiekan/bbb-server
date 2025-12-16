@@ -116,8 +116,8 @@ async function sendSuccessEmails(order, webhookModel) {
     if (webhookModel.paymentMethod === 'REFERENCE') {
       await email.referencePaidEmail(
         customerAddress.customerEmail,
-        customerAddress.customerName.split(' ')[0],
-        customerAddress.customerName.split(' ').slice(1).join(' '),
+        customerAddress.customerName.trimStart().split(' ')[0],
+        customerAddress.customerName.trimStart().split(' ').slice(1).join(' '),
         order.orderID,
         customerAddress.customerCompany,
         `Rua: ${customerAddress.orderAddress.split(', ')[0]}, Número da porta: ${
@@ -135,8 +135,8 @@ async function sendSuccessEmails(order, webhookModel) {
 
       await email.sendEmailToStore(
         customerAddress.customerEmail,
-        customerAddress.customerName.split(' ')[0],
-        customerAddress.customerName.split(' ').slice(1).join(' '),
+        customerAddress.customerName.trimStart().split(' ')[0],
+        customerAddress.customerName.trimStart().split(' ').slice(1).join(' '),
         order.orderID,
         customerAddress.customerCompany,
         `Rua: ${customerAddress.orderAddress.split(', ')[0]}, Número da porta: ${
@@ -153,8 +153,8 @@ async function sendSuccessEmails(order, webhookModel) {
     } else {
       email.sendCompletedEmail(
         customerAddress.customerEmail,
-        customerAddress.customerName.split(' ')[0],
-        customerAddress.customerName.split(' ').slice(1).join(' '),
+        customerAddress.customerName.trimStart().split(' ')[0],
+        customerAddress.customerName.trimStart().split(' ').slice(1).join(' '),
         order.orderID,
         customerAddress.customerCompany,
         `Rua: ${customerAddress.orderAddress.split(', ')[0]}, Número da porta: ${
