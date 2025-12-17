@@ -77,7 +77,7 @@ class MailController {
       const totalPrice = userOrder.sum;
       const promocodeName = userOrder.promocodeName;
       const promocodeValue = userOrder.promocodeValue;
-      const orderHTML = email.formatOrderToHTML(
+      const orderHTML = sendEmail.formatOrderToHTML(
         orderItems,
         totalCount,
         deliveryPrice,
