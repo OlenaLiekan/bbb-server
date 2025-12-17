@@ -262,7 +262,21 @@ class UserController {
     if (userId && firstAddress && !updatedAddressId) {
       company = company ? company : '';
       secondAddress = secondAddress ? secondAddress : '';
-      UserAddress.create({
+      if (mainAddress) {
+        const prevMainAddress = await UserAddress.findOne({
+          where: {
+            userId: userId,
+            mainAddress: true,
+          },
+        });
+        let options = {
+          where: { id: prevMainAddress.id },
+        };
+        let props = {};
+        props = { ...props, mainAddress: false };
+        await UserAddress.update(props, options);
+      }
+      await UserAddress.create({
         userId,
         firstName: crFirstName,
         lastName: crLastName,
@@ -286,6 +300,23 @@ class UserController {
     }
 
     if (updatedAddressId) {
+      if (mainAddress) {
+        const prevMainAddress = await UserAddress.findOne({
+          where: {
+            userId: id,
+            mainAddress: true,
+          },
+        });
+        if (prevMainAddress.id !== updatedAddressId) {
+          let options = {
+            where: { id: prevMainAddress.id },
+          };
+          let props = {};
+          props = { ...props, mainAddress: false };
+          await UserAddress.update(props, options);
+        }
+      }
+
       let options = {
         where: { id: updatedAddressId },
       };
@@ -326,7 +357,7 @@ class UserController {
       }
 
       props = { ...props, mainAddress };
-      UserAddress.update(props, options);
+      await UserAddress.update(props, options);
     }
     return res.json(user);
   }
