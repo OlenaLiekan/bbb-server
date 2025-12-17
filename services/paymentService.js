@@ -98,13 +98,15 @@ async function sendSuccessEmails(order, webhookModel) {
     const totalPrice = userOrder.sum;
     const promocodeName = userOrder.promocodeName;
     const promocodeValue = userOrder.promocodeValue;
+    const promocodeBrandId = userOrder.promocodeBrandId;
     const orderHTML = email.formatOrderToHTML(
       orderItems,
       totalCount,
       deliveryPrice,
       totalPrice,
       promocodeName,
-      promocodeValue
+      promocodeValue,
+      promocodeBrandId
     );
 
     if (!order) {

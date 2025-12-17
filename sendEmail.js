@@ -256,7 +256,8 @@ function formatOrderToHTML(
   deliveryPrice,
   totalPrice,
   promocodeName,
-  promocodeValue
+  promocodeValue,
+  promocodeBrandId
 ) {
   const formattedOrder = orderItems
     .map((item, index) => {

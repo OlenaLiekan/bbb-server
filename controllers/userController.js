@@ -178,6 +178,7 @@ class UserController {
       orderId,
       promocodeName,
       promocodeValue,
+      promocodeBrandId,
     } = req.body;
 
     let options = {
@@ -219,6 +220,7 @@ class UserController {
         userComment,
         promocodeName,
         promocodeValue,
+        promocodeBrandId,
       });
       items = JSON.parse(items);
       items.forEach(item => {
@@ -247,6 +249,9 @@ class UserController {
             item.count,
           img: item.img,
           userOrderId: userOrder.id,
+          brandId: item.brandId,
+          promocodeAllowed: item.exclusiveProduct || item.promoProduct ? false : true,
+          prevPrice: item.prevPrice,
         });
       });
     }

@@ -28,6 +28,7 @@ const UserOrder = sequelize.define('user_order', {
   userComment: { type: DataTypes.STRING, allowNull: true },
   promocodeName: { type: DataTypes.STRING, allowNull: true },
   promocodeValue: { type: DataTypes.STRING, allowNull: true },
+  promocodeBrandId: { type: DataTypes.STRING, allowNull: true },
 });
 
 const UserPromocode = sequelize.define('user_promocode', {
@@ -57,6 +58,9 @@ const OrderItem = sequelize.define('order_item', {
   title: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.STRING, allowNull: false },
   img: { type: DataTypes.STRING, allowNull: false },
+  brandId: { type: DataTypes.STRING, allowNull: false },
+  promocodeAllowed: { type: DataTypes.BOOLEAN, allowNull: false },
+  prevPrice: { type: DataTypes.NUMBER, allowNull: false },
 });
 
 const Product = sequelize.define('product', {
