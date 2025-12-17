@@ -75,6 +75,9 @@ async function sendSuccessEmails(order, webhookModel) {
         isLashes: hasOptions,
         info: {},
         img: orderItem.img,
+        brandId: orderItem.brandId,
+        promocodeAllowed: orderItem.promocodeAllowed,
+        prevPrice: orderItem.prevPrice,
       };
 
       descriptionLines.slice(2, priceIndex).forEach(line => {

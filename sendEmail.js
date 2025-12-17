@@ -277,7 +277,7 @@ function formatOrderToHTML(
                       ${promocodeName || ''}
                     </span>
                     <span style="color: #5c5c5cff; font-size: 14px;">
-                      (-0.01€)
+                      (-${(item.prevPrice * item.count - item.price * item.count).toFixed(2)} €)
                     </span>
                   </div>`;
 
@@ -314,7 +314,12 @@ function formatOrderToHTML(
             <div style="color: #666666; font-size: 12px; line-height: 1.4; text-align: left;">
               ${detailsHTML || ''}
             </div>
-            ${item.code === '123' ? promoLine : ''}
+            ${
+              item.promocodeAllowed &&
+              (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
+                ? promoLine
+                : ''
+            }
           </td>
           <td width="32%" style="vertical-align: top; text-align: right;">
             <div style="padding-top: 5px;">
@@ -322,7 +327,12 @@ function formatOrderToHTML(
                 <b>${(item.price * item.count).toFixed(2)} €</b>
               </div>
               <div style="font-size: 14px; color: #939393; text-decoration: line-through;">
-                <b>${item.code === '123' ? (item.price * item.count).toFixed(2) + ' €' : ''}</b>
+                <b>${
+                  item.promocodeAllowed &&
+                  (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
+                    ? (Number(item.prevPrice) * item.count).toFixed(2) + ' €'
+                    : ''
+                }</b>
               </div>
             </div>
           </td>
