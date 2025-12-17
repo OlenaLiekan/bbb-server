@@ -302,7 +302,7 @@ function formatOrderToHTML(
       const productHTML = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif;">
         <tr>
           <td width="10%" style="vertical-align: top; padding-top: 5px;">
-            <div style="position: relative; width: 45px; height: 45px; border-radius: 10px; background-color: #ffffff; margin-right: 10px;">
+            <div style="position: relative; width: 45px; height: 45px; border-radius: 10px; background-color: #ffffff; margin-right: 10px; overflow: hidden;">
               ${item.img ? productImage : ''}            
             </div>
           </td>
