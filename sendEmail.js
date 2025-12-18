@@ -315,7 +315,10 @@ function formatOrderToHTML(
               ${detailsHTML || ''}
             </div>
             ${
+              item.prevPrice - item.price > 0 &&
               item.promocodeAllowed &&
+              promocodeValue &&
+              promocodeName &&
               (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
                 ? promoLine
                 : ''
@@ -328,7 +331,10 @@ function formatOrderToHTML(
               </div>
               <div style="font-size: 14px; color: #939393; text-decoration: line-through;">
                 <b>${
+                  item.prevPrice - item.price > 0 &&
                   item.promocodeAllowed &&
+                  promocodeValue &&
+                  promocodeName &&
                   (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
                     ? (Number(item.prevPrice) * item.count).toFixed(2) + ' €'
                     : ''
