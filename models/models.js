@@ -66,12 +66,12 @@ const OrderItem = sequelize.define('order_item', {
 const Kit = sequelize.define('kit', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, unique: true, allowNull: false },
-  price: { type: DataTypes.NUMBER, allowNull: true },
+  price: { type: DataTypes.INTEGER, allowNull: true },
   img: { type: DataTypes.STRING, allowNull: true },
   isLashes: { type: DataTypes.BOOLEAN, allowNull: false },
   topProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   exclusiveProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
-  discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
+  discountPrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
   isPromo: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   newProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
 });
