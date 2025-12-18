@@ -63,6 +63,19 @@ const OrderItem = sequelize.define('order_item', {
   prevPrice: { type: DataTypes.NUMBER, allowNull: false },
 });
 
+const Kit = sequelize.define('kit', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, unique: true, allowNull: false },
+  price: { type: DataTypes.NUMBER, allowNull: true },
+  img: { type: DataTypes.STRING, allowNull: true },
+  isLashes: { type: DataTypes.BOOLEAN, allowNull: false },
+  topProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+  exclusiveProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+  discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
+  isPromo: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+  newProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
+});
+
 const Product = sequelize.define('product', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   code: { type: DataTypes.INTEGER, allowNull: false, unique: true },
@@ -270,6 +283,9 @@ Review.belongsTo(User);
 Basket.hasMany(BasketProduct);
 BasketProduct.belongsTo(Basket);
 
+Kit.hasMany(Product);
+Product.belongsTo(Kit);
+
 Category.hasMany(Type);
 Type.belongsTo(Category);
 
@@ -281,6 +297,15 @@ Product.belongsTo(Type);
 
 Brand.hasMany(Product);
 Product.belongsTo(Brand);
+
+Category.hasMany(Kit);
+Kit.belongsTo(Category);
+
+Type.hasMany(Kit);
+Kit.belongsTo(Type);
+
+Brand.hasMany(Kit);
+Kit.belongsTo(Brand);
 
 Product.hasMany(Rating);
 Rating.belongsTo(Product);
@@ -325,6 +350,7 @@ module.exports = {
   OrderItem,
   Basket,
   BasketProduct,
+  Kit,
   Product,
   Category,
   Type,
