@@ -281,6 +281,15 @@ function formatOrderToHTML(
                     </span>
                   </div>`;
 
+      const discountPriceLine = `<div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
+                    <span style="display: flex; align-items: center; color: #AD902B; border: 1.2px solid #AD902B; font-size: 14px; padding: 3px 5px; border-radius: 5px;">
+                      -${(100 - (item.price / item.prevPrice) * 100).toFixed(0)}%
+                    </span>
+                    <span style="color: #5c5c5cff; font-size: 14px;">
+                      (-${(item.prevPrice * item.count - item.price * item.count).toFixed(2)} €)
+                    </span>
+                  </div>`;
+
       if (item.isLashes) {
         detailsHTML += `<span style="color: #666666; font-size: 12px; line-height: 1.4;">
         ${item.curlArr || ''}${item.curlArr && (item.thicknessArr || item.lengthArr) ? ' / ' : ''}
@@ -321,6 +330,8 @@ function formatOrderToHTML(
               promocodeName &&
               (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
                 ? promoLine
+                : item.prevPrice - item.price > 0
+                ? discountPriceLine
                 : ''
             }
           </td>
@@ -330,15 +341,13 @@ function formatOrderToHTML(
                 <b>${(item.price * item.count).toFixed(2)} €</b>
               </div>
               <div style="font-size: 14px; color: #939393; text-decoration: line-through;">
-                <b>${
-                  item.prevPrice - item.price > 0 &&
-                  item.promocodeAllowed &&
-                  promocodeValue &&
-                  promocodeName &&
-                  (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
-                    ? (Number(item.prevPrice) * item.count).toFixed(2) + ' €'
-                    : ''
-                }</b>
+                <b>
+                  ${
+                    item.prevPrice - item.price > 0
+                      ? (Number(item.prevPrice) * item.count).toFixed(2) + ' €'
+                      : ''
+                  }
+                </b>
               </div>
             </div>
           </td>
