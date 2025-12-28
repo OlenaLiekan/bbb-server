@@ -282,9 +282,9 @@ function formatOrderToHTML(
                   </div>`;
 
       const discountPriceLine = `<div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
-                    <span style="display: flex; align-items: center; color: #AD902B; border: 1.2px solid #AD902B; font-size: 14px; padding: 3px 5px; border-radius: 5px;">
+                    <div style="display: flex; align-items: center; color: #AD902B; border: 1.2px solid #AD902B; font-size: 14px; padding: 3px 5px; border-radius: 5px; margin-right: 5px;">
                       -${(100 - (item.price / item.prevPrice) * 100).toFixed(0)}%
-                    </span>
+                    </div>
                     <span style="color: #5c5c5cff; font-size: 14px;">
                       (-${(item.prevPrice * item.count - item.price * item.count).toFixed(2)} €)
                     </span>
