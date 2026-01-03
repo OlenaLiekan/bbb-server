@@ -58,7 +58,7 @@ const OrderItem = sequelize.define('order_item', {
   title: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.STRING, allowNull: false },
   img: { type: DataTypes.STRING, allowNull: false },
-  brandId: { type: DataTypes.STRING, allowNull: false },
+  brandId: { type: DataTypes.STRING, allowNull: true },
   promocodeAllowed: { type: DataTypes.BOOLEAN, allowNull: false },
   prevPrice: { type: DataTypes.NUMBER, allowNull: true },
 });
