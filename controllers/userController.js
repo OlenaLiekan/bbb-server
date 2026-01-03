@@ -249,9 +249,9 @@ class UserController {
             item.count,
           img: item.img,
           userOrderId: userOrder.id,
-          brandId: item.brandId,
+          brandId: item.brandId ? item.brandId : null,
           promocodeAllowed: item.exclusiveProduct || item.promoProduct ? false : true,
-          prevPrice: item.prevPrice,
+          prevPrice: item.prevPrice ? item.prevPrice : null,
         });
       });
     }
