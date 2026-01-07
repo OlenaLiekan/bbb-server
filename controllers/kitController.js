@@ -19,10 +19,11 @@ class KitController {
         newProduct,
       } = req.body;
 
+      const { img } = req.files ? req.files : '';
+
       let fileName = null;
 
-      if (req.files) {
-        const { img } = req.files;
+      if (img) {
         const fileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!fileTypes.includes(img.mimetype)) {
           return res.send('Image formats supported: JPG, PNG, JPEG');
