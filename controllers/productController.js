@@ -27,6 +27,7 @@ class ProductController {
         info,
         related,
         isLashes,
+        variant,
         kitId,
         available,
         topProduct,
@@ -35,16 +36,27 @@ class ProductController {
         newProduct,
         compound,
         applying,
+        kitImg,
       } = req.body;
-      if (!req.files) return res.send('Please upload an image');
-      const { img } = req.files;
+
+      const { img } = req.files ? req.files : '';
       let { slide } = req.files ? req.files : '';
-      const fileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!fileTypes.includes(img.mimetype)) {
-        return res.send('Image formats supported: JPG, PNG, JPEG');
+
+      let fileName = '';
+
+      if (img) {
+        const fileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!fileTypes.includes(img.mimetype)) {
+          return res.send('Image formats supported: JPG, PNG, JPEG');
+        }
+        const cloudFile = await upload(img.tempFilePath);
+        fileName = cloudFile.secure_url.split('/').pop();
       }
-      const cloudFile = await upload(img.tempFilePath);
-      const fileName = cloudFile.secure_url.split('/').pop();
+
+      if (kitImg) {
+        fileName = kitImg;
+      }
+
       let slideName = '';
       let slideNames = [];
 
@@ -72,11 +84,12 @@ class ProductController {
         typeId,
         img: fileName,
         isLashes,
-        kitId,
         available,
         topProduct,
         exclusiveProduct,
         newProduct,
+        kitId,
+        variant,
       });
 
       ProductText.create({
@@ -150,6 +163,7 @@ class ProductController {
     const { id } = req.params;
     let {
       name,
+      variant,
       rating,
       code,
       price,
@@ -169,6 +183,7 @@ class ProductController {
       topProduct,
       exclusiveProduct,
       newProduct,
+      kitId,
     } = req.body;
 
     const { img } = req.files ? req.files : '';
@@ -222,6 +237,11 @@ class ProductController {
     }
     if (rating) {
       props = { ...props, rating };
+    }
+
+    if (kitId) {
+      props = { ...props, kitId };
+      props = { ...props, variant };
     }
 
     props = {
@@ -337,6 +357,7 @@ class ProductController {
       price,
       discountPrice,
       isPromo,
+      kitId,
     } = req.query;
     const offset = page * limit - limit;
 
@@ -389,6 +410,10 @@ class ProductController {
 
     if (isPromo) {
       options.where = { ...options.where, isPromo };
+    }
+
+    if (kitId) {
+      options.where = { ...options.where, kitId };
     }
 
     const products = await Product.findAndCountAll(options);

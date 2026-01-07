@@ -69,8 +69,6 @@ const Kit = sequelize.define('kit', {
   price: { type: DataTypes.NUMBER, allowNull: true },
   img: { type: DataTypes.STRING, allowNull: true },
   isLashes: { type: DataTypes.BOOLEAN, allowNull: false },
-  topProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
-  exclusiveProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
   isPromo: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   newProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
@@ -88,6 +86,7 @@ const Product = sequelize.define('product', {
   topProduct: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   exclusiveProduct: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
+  variant: { type: DataTypes.STRING, allowNull: true },
   isPromo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   newProduct: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
 });

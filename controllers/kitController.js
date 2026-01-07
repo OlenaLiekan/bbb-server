@@ -18,14 +18,18 @@ class KitController {
         isLashes,
         newProduct,
       } = req.body;
-      if (!req.files) return res.send('Please upload an image');
-      const { img } = req.files;
-      const fileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!fileTypes.includes(img.mimetype)) {
-        return res.send('Image formats supported: JPG, PNG, JPEG');
+
+      let fileName = null;
+
+      if (req.files) {
+        const { img } = req.files;
+        const fileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!fileTypes.includes(img.mimetype)) {
+          return res.send('Image formats supported: JPG, PNG, JPEG');
+        }
+        const cloudFile = await upload(img.tempFilePath);
+        fileName = cloudFile.secure_url.split('/').pop();
       }
-      const cloudFile = await upload(img.tempFilePath);
-      const fileName = cloudFile.secure_url.split('/').pop();
 
       const kit = await Kit.create({
         name,
@@ -48,19 +52,8 @@ class KitController {
 
   async update(req, res, next) {
     const { id } = req.params;
-    let {
-      name,
-      price,
-      discountPrice,
-      isPromo,
-      categoryId,
-      brandId,
-      typeId,
-      isLashes,
-      topProduct,
-      exclusiveProduct,
-      newProduct,
-    } = req.body;
+    let { name, price, discountPrice, isPromo, categoryId, brandId, typeId, isLashes, newProduct } =
+      req.body;
 
     const { img } = req.files ? req.files : '';
 
@@ -84,9 +77,6 @@ class KitController {
     if (price) {
       props = { ...props, price };
     }
-    if (categoryId) {
-      props = { ...props, categoryId };
-    }
     if (brandId) {
       props = { ...props, brandId };
     }
@@ -97,9 +87,8 @@ class KitController {
     props = {
       ...props,
       isLashes,
-      topProduct,
-      exclusiveProduct,
       isPromo,
+      categoryId,
       discountPrice,
       newProduct,
     };
