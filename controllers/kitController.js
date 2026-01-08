@@ -34,8 +34,8 @@ class KitController {
 
       const kit = await Kit.create({
         name,
-        price,
-        discountPrice,
+        price: price ? price : null,
+        discountPrice: discountPrice ? discountPrice : null,
         isPromo,
         categoryId,
         brandId,
