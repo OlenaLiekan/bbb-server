@@ -78,6 +78,11 @@ class KitController {
     if (price) {
       props = { ...props, price };
     }
+
+    if (discountPrice) {
+      props = { ...props, discountPrice };
+    }
+
     if (brandId) {
       props = { ...props, brandId };
     }
@@ -90,7 +95,6 @@ class KitController {
       isLashes,
       isPromo,
       categoryId,
-      discountPrice,
       newProduct,
     };
 
