@@ -51,9 +51,7 @@ class ProductController {
         }
         const cloudFile = await upload(img.tempFilePath);
         fileName = cloudFile.secure_url.split('/').pop();
-      }
-
-      if (kitImg) {
+      } else if (kitImg) {
         fileName = kitImg;
       }
 
