@@ -416,26 +416,6 @@ class ProductController {
 
     const products = await Product.findAndCountAll(options);
 
-    const seenKitIds = new Set();
-    const filteredRows = [];
-
-    for (const product of products.rows) {
-      // Если нет kitId или kitId пустой - всегда показываем
-      if (!product.kitId || product.kitId === 0 || product.kitId === '0') {
-        filteredRows.push(product);
-      }
-      // Если есть kitId и мы его еще не видели - показываем
-      else if (!seenKitIds.has(String(product.kitId))) {
-        filteredRows.push(product);
-        seenKitIds.add(String(product.kitId));
-      }
-      // Если уже видели такой kitId - пропускаем (дубль)
-    }
-
-    // Заменяем rows на отфильтрованные
-    products.rows = filteredRows;
-    // === КОНЕЦ ДОБАВЛЕНИЯ ===
-
     products.sort = req.query.sort;
     return res.json(products);
   }
