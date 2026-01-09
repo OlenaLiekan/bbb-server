@@ -414,37 +414,10 @@ class ProductController {
       options.where = { ...options.where, kitId };
     }
 
-    const allProducts = await Product.findAll({
-      where: options.where,
-      order: [[sort, order]],
-      include: options.include,
-    });
+    const products = await Product.findAndCountAll(options);
 
-    // 2. Фильтруем дубли kitId
-    const seenKitIds = new Set();
-    const filteredProducts = [];
-
-    for (const product of allProducts) {
-      if (!product.kitId || product.kitId === 0 || product.kitId === '0') {
-        filteredProducts.push(product);
-      } else if (!seenKitIds.has(String(product.kitId))) {
-        filteredProducts.push(product);
-        seenKitIds.add(String(product.kitId));
-      }
-    }
-
-    // 3. Применяем пагинацию ВРУЧНУЮ к отфильтрованному списку
-    const totalCount = filteredProducts.length;
-    const startIndex = offset;
-    const endIndex = Math.min(offset + limit, totalCount);
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-
-    // 4. Возвращаем результат
-    return res.json({
-      rows: paginatedProducts,
-      count: totalCount, // правильное количество для пагинации
-      sort: req.query.sort,
-    });
+    products.sort = req.query.sort;
+    return res.json(products);
   }
 
   async getOne(req, res) {
