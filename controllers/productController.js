@@ -411,24 +411,27 @@ class ProductController {
 
     // 3. СУБЗАПРОС для уникальности kitId
     const subquery = `
-    SELECT id FROM (
-      SELECT id, kitId,
-        ROW_NUMBER() OVER (
-          PARTITION BY "kitId" 
-          ORDER BY "${sort}" ${order} NULLS LAST
-        ) as row_num
-      FROM products
-      ${whereClause}
-      AND "kitId" IS NOT NULL
-      
-      UNION ALL
-      
-      SELECT id, kitId FROM products 
-      ${whereClause}
-      AND "kitId" IS NULL
-    ) as tmp 
-    WHERE "kitId" IS NULL OR row_num = 1
-  `;
+  -- Товары без kitId
+  SELECT "id", 1 as priority FROM "products"
+  ${whereClause}
+  AND "kitId" IS NULL
+  
+  UNION
+  
+  -- По одному товару из каждой группы kitId (первый по сортировке)
+  SELECT DISTINCT ON ("kitId") "id", 2 as priority 
+  FROM "products"
+  ${whereClause}
+  AND "kitId" IS NOT NULL
+  ORDER BY "kitId", "${sort}" ${order}
+`;
+
+    console.log('Subquery:', subquery);
+    console.log('Replacements:', replacements);
+
+    const test = await Sequelize.query(subquery, { replacements });
+    console.log('Test result:', test[0].length, 'rows');
+    console.log('First 5 IDs:', test[0].slice(0, 5));
 
     // 4. Основной запрос
     const products = await Product.findAndCountAll({
@@ -441,7 +444,10 @@ class ProductController {
       },
       limit,
       offset,
-      order: [[sort, order]],
+      order: [
+        ['priority', 'ASC'],
+        [sort, order],
+      ],
       distinct: true,
       include: [
         { model: ProductRelated, as: 'related' },
