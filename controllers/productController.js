@@ -357,17 +357,71 @@ class ProductController {
       isPromo,
       kitId,
     } = req.query;
-    const offset = page * limit - limit;
+    const offset = (page - 1) * limit;
 
     let sort = req.query.sort ? req.query.sort : 'rating';
     let order = req.query.order ? req.query.order : 'ASC';
 
-    let options = {
-      limit,
-      offset,
+    // 1. Собираем условия WHERE как раньше
+    let where = {};
+
+    if (categoryId) where.categoryId = categoryId;
+    if (brandId) where.brandId = brandId;
+    if (typeId) where.typeId = typeId;
+    if (rating) where.rating = rating;
+    if (name) where.name = { [Op.iLike]: `%${name}%` };
+    if (price) where.price = price;
+    if (discountPrice) where.discountPrice = discountPrice;
+    if (isPromo) where.isPromo = isPromo;
+    if (kitId) where.kitId = kitId;
+
+    // 2. Получаем ВСЕ ID товаров с учетом условий и сортировки
+    const allProducts = await Product.findAll({
+      where,
       order: [[sort, order]],
-      distinct: true,
-      where: {},
+      attributes: ['id', 'kitId'], // Только ID и kitId для экономии памяти
+    });
+
+    // 3. Фильтруем: все без kitId + по одному из каждого kitId
+    const seenKitIds = new Set();
+    const uniqueProductIds = [];
+
+    for (const product of allProducts) {
+      const kitValue = product.kitId;
+
+      // Товары без kitId всегда добавляем
+      if (!kitValue || kitValue === 0 || kitValue === '0') {
+        uniqueProductIds.push(product.id);
+      }
+      // Товары с kitId - только первый из каждой группы
+      else if (!seenKitIds.has(String(kitValue))) {
+        uniqueProductIds.push(product.id);
+        seenKitIds.add(String(kitValue));
+      }
+    }
+
+    // 4. Применяем пагинацию к ОТФИЛЬТРОВАННЫМ ID
+    const totalCount = uniqueProductIds.length;
+    const startIndex = offset;
+    const endIndex = Math.min(offset + limit, totalCount);
+    const pageIds = uniqueProductIds.slice(startIndex, endIndex);
+
+    // 5. Если нет товаров для страницы - возвращаем пустой результат
+    if (pageIds.length === 0) {
+      return res.json({
+        rows: [],
+        count: totalCount,
+        sort: sort,
+      });
+    }
+
+    // 6. Получаем ПОЛНЫЕ данные только для нужных ID страницы
+    const products = await Product.findAll({
+      where: {
+        ...where,
+        id: pageIds,
+      },
+      order: [[sort, order]],
       include: [
         { model: ProductRelated, as: 'related' },
         { model: ProductInfo, as: 'info' },
@@ -376,48 +430,22 @@ class ProductController {
         { model: ProductApplying, as: 'applying' },
         { model: ProductCompound, as: 'compound' },
       ],
-    };
+    });
 
-    if (categoryId) {
-      options.where = { ...options.where, categoryId };
-    }
+    // 7. Важно: сохраняем порядок как в pageIds
+    const idToProduct = {};
+    products.forEach(product => {
+      idToProduct[product.id] = product;
+    });
 
-    if (brandId) {
-      options.where = { ...options.where, brandId };
-    }
+    const orderedProducts = pageIds.map(id => idToProduct[id]).filter(Boolean);
 
-    if (typeId) {
-      options.where = { ...options.where, typeId };
-    }
-
-    if (rating) {
-      options.where = { ...options.where, rating };
-    }
-
-    if (name) {
-      options.where = { ...options.where, name: { [Op.iLike]: `%${name}%` } };
-    }
-
-    if (price) {
-      options.where = { ...options.where, price };
-    }
-
-    if (discountPrice) {
-      options.where = { ...options.where, discountPrice };
-    }
-
-    if (isPromo) {
-      options.where = { ...options.where, isPromo };
-    }
-
-    if (kitId) {
-      options.where = { ...options.where, kitId };
-    }
-
-    const products = await Product.findAndCountAll(options);
-
-    products.sort = req.query.sort;
-    return res.json(products);
+    // 8. Возвращаем результат
+    return res.json({
+      rows: orderedProducts,
+      count: totalCount, // правильное количество для пагинации
+      sort: sort,
+    });
   }
 
   async getOne(req, res) {
