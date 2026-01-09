@@ -1,3 +1,4 @@
+const sequelize = require('../db');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const {
@@ -411,25 +412,26 @@ class ProductController {
 
     // 3. СУБЗАПРОС для уникальности kitId
     const subquery = `
-  -- Товары без kitId
-  SELECT "id", 1 as priority FROM "products"
-  ${whereClause}
-  AND "kitId" IS NULL
-  
-  UNION
-  
-  -- По одному товару из каждой группы kitId (первый по сортировке)
-  SELECT DISTINCT ON ("kitId") "id", 2 as priority 
-  FROM "products"
-  ${whereClause}
-  AND "kitId" IS NOT NULL
-  ORDER BY "kitId", "${sort}" ${order}
-`;
+    -- Все уникальные товары (без дублей kitId)
+    SELECT "id" FROM (
+      -- Товары без kitId
+      SELECT "id", "kitId" FROM "products"
+      ${whereClause ? whereClause + ' AND' : 'WHERE'} "kitId" IS NULL
+      
+      UNION
+      
+      -- По одному товару из каждой группы kitId
+      SELECT DISTINCT ON ("kitId") "id", "kitId"
+      FROM "products"
+      ${whereClause ? whereClause + ' AND' : 'WHERE'} "kitId" IS NOT NULL
+      ORDER BY "kitId", "${sort}" ${order}
+    ) AS unique_products
+  `;
 
     console.log('Subquery:', subquery);
     console.log('Replacements:', replacements);
 
-    const test = await Sequelize.query(subquery, { replacements });
+    const test = await sequelize.query(subquery, { replacements });
     console.log('Test result:', test[0].length, 'rows');
     console.log('First 5 IDs:', test[0].slice(0, 5));
 
@@ -437,17 +439,14 @@ class ProductController {
     const products = await Product.findAndCountAll({
       where: {
         id: {
-          [Op.in]: Sequelize.literal(`(${subquery})`),
+          [Op.in]: sequelize.literal(`(${subquery})`),
         },
         // Если нужна фильтрация по конкретному kitId (для детальной страницы)
         ...(kitId && { kitId }),
       },
       limit,
       offset,
-      order: [
-        ['priority', 'ASC'],
-        [sort, order],
-      ],
+      order: [[sort, order]],
       distinct: true,
       include: [
         { model: ProductRelated, as: 'related' },
