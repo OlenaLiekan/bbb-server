@@ -1,4 +1,3 @@
-const sequelize = require('../db');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const {
@@ -363,91 +362,12 @@ class ProductController {
     let sort = req.query.sort ? req.query.sort : 'rating';
     let order = req.query.order ? req.query.order : 'ASC';
 
-    // 1. Собираем условия WHERE
-    let whereConditions = [];
-    const replacements = {};
-
-    if (categoryId) {
-      whereConditions.push('categoryId = :categoryId');
-      replacements.categoryId = categoryId;
-    }
-
-    if (brandId) {
-      whereConditions.push('brandId = :brandId');
-      replacements.brandId = brandId;
-    }
-
-    if (typeId) {
-      whereConditions.push('typeId = :typeId');
-      replacements.typeId = typeId;
-    }
-
-    if (rating) {
-      whereConditions.push('rating = :rating');
-      replacements.rating = rating;
-    }
-
-    if (name) {
-      whereConditions.push('name ILIKE :name');
-      replacements.name = `%${name}%`;
-    }
-
-    if (price) {
-      whereConditions.push('price = :price');
-      replacements.price = price;
-    }
-
-    if (discountPrice) {
-      whereConditions.push('discountPrice = :discountPrice');
-      replacements.discountPrice = discountPrice;
-    }
-
-    if (isPromo) {
-      whereConditions.push('isPromo = :isPromo');
-      replacements.isPromo = isPromo;
-    }
-
-    // 2. Создаем WHERE строку
-    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
-
-    // 3. СУБЗАПРОС для уникальности kitId
-    const subquery = `
-    -- Все уникальные товары (без дублей kitId)
-    SELECT "id" FROM (
-      -- Товары без kitId
-      SELECT "id", "kitId" FROM "products"
-      ${whereClause ? whereClause + ' AND' : 'WHERE'} "kitId" IS NULL
-      
-      UNION
-      
-      -- По одному товару из каждой группы kitId
-      SELECT DISTINCT ON ("kitId") "id", "kitId"
-      FROM "products"
-      ${whereClause ? whereClause + ' AND' : 'WHERE'} "kitId" IS NOT NULL
-      ORDER BY "kitId", "${sort}" ${order}
-    ) AS unique_products
-  `;
-
-    console.log('Subquery:', subquery);
-    console.log('Replacements:', replacements);
-
-    const test = await sequelize.query(subquery, { replacements });
-    console.log('Test result:', test[0].length, 'rows');
-    console.log('First 5 IDs:', test[0].slice(0, 5));
-
-    // 4. Основной запрос
-    const products = await Product.findAndCountAll({
-      where: {
-        id: {
-          [Op.in]: sequelize.literal(`(${subquery})`),
-        },
-        // Если нужна фильтрация по конкретному kitId (для детальной страницы)
-        ...(kitId && { kitId }),
-      },
+    let options = {
       limit,
       offset,
       order: [[sort, order]],
       distinct: true,
+      where: {},
       include: [
         { model: ProductRelated, as: 'related' },
         { model: ProductInfo, as: 'info' },
@@ -456,8 +376,65 @@ class ProductController {
         { model: ProductApplying, as: 'applying' },
         { model: ProductCompound, as: 'compound' },
       ],
-      replacements, // Передаем параметры для подзапроса
-    });
+    };
+
+    if (categoryId) {
+      options.where = { ...options.where, categoryId };
+    }
+
+    if (brandId) {
+      options.where = { ...options.where, brandId };
+    }
+
+    if (typeId) {
+      options.where = { ...options.where, typeId };
+    }
+
+    if (rating) {
+      options.where = { ...options.where, rating };
+    }
+
+    if (name) {
+      options.where = { ...options.where, name: { [Op.iLike]: `%${name}%` } };
+    }
+
+    if (price) {
+      options.where = { ...options.where, price };
+    }
+
+    if (discountPrice) {
+      options.where = { ...options.where, discountPrice };
+    }
+
+    if (isPromo) {
+      options.where = { ...options.where, isPromo };
+    }
+
+    if (kitId) {
+      options.where = { ...options.where, kitId };
+    }
+
+    const products = await Product.findAndCountAll(options);
+
+    const seenKitIds = new Set();
+    const filteredRows = [];
+
+    for (const product of products.rows) {
+      // Если нет kitId или kitId пустой - всегда показываем
+      if (!product.kitId || product.kitId === 0 || product.kitId === '0') {
+        filteredRows.push(product);
+      }
+      // Если есть kitId и мы его еще не видели - показываем
+      else if (!seenKitIds.has(String(product.kitId))) {
+        filteredRows.push(product);
+        seenKitIds.add(String(product.kitId));
+      }
+      // Если уже видели такой kitId - пропускаем (дубль)
+    }
+
+    // Заменяем rows на отфильтрованные
+    products.rows = filteredRows;
+    // === КОНЕЦ ДОБАВЛЕНИЯ ===
 
     products.sort = req.query.sort;
     return res.json(products);
