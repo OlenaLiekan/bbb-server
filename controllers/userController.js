@@ -274,12 +274,14 @@ class UserController {
             mainAddress: true,
           },
         });
-        let options = {
-          where: { id: prevMainAddress.id },
-        };
-        let props = {};
-        props = { ...props, mainAddress: false };
-        await UserAddress.update(props, options);
+        if (prevMainAddress) {
+          let options = {
+            where: { id: prevMainAddress.id },
+          };
+          let props = {};
+          props = { ...props, mainAddress: false };
+          await UserAddress.update(props, options);
+        }
       }
       await UserAddress.create({
         userId,
