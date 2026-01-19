@@ -10,6 +10,11 @@
   "keywords": [],
   "author": "Olena Liekan <olena.liekan@gmail.com>",
   "license": "ISC",
+    "engines": {
+    "node": "18.x",
+    "npm": ">=8.0.0",
+    "yarn": ">=1.22.0"
+  },
   "dependencies": {
     "axios": "^1.7.7",
     "bcrypt": "^5.1.0",
@@ -23,8 +28,8 @@
     "express-fileupload": "^1.4.0",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.0",
-    "multer": "^1.4.5-lts.1",
-    "node-fetch": "^3.3.2",
+    "multer": "^2.0.0-rc.3",
+    "node-fetch": "^2.6.7",
     "nodemailer": "^6.9.16",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
