@@ -94,23 +94,55 @@ class UserController {
   }
 
   async getById(req, res) {
-    const { id } = req.params;
-    let options = {
-      where: {},
-      include: [
-        { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
-        { model: UserPromocode, as: 'promocode' },
-        {
-          model: UserAddress,
-          as: 'address',
-        },
-      ],
-    };
-    if (id) {
-      options.where = { ...options.where, id };
+    try {
+      const { id } = req.params;
+
+      const userAgent = req.headers['user-agent'] || 'unknown';
+      const ip = req.ip || req.connection.remoteAddress;
+
+      const userId = parseInt(id);
+
+      if (isNaN(userId)) {
+        console.log(`🚨 BLOCKED BOT: IP=${ip}, ID="${id}", UA=${userAgent}, Path=${req.path}`);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid user ID',
+        });
+      }
+
+      console.log(
+        `✅ Valid user request: IP=${ip}, UserID=${userId}, UA=${userAgent.substring(0, 30)}`
+      );
+
+      let options = {
+        where: {},
+        include: [
+          { model: UserOrder, as: 'order', include: [{ model: OrderItem, as: 'item' }] },
+          { model: UserPromocode, as: 'promocode' },
+          {
+            model: UserAddress,
+            as: 'address',
+          },
+        ],
+      };
+      if (userId) {
+        options.where = { ...options.where, id: userId };
+      }
+      const user = await User.findOne(options);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+      return res.json(user);
+    } catch (error) {
+      console.error('Error in user getById:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
     }
-    const user = await User.findOne(options);
-    return res.json(user);
   }
 
   async getOne(req, res) {

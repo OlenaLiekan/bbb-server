@@ -12,8 +12,17 @@ const colors = require('colors');
 const { setSecurityHeaders } = require('./security');
 const cookieParser = require('cookie-parser');
 const { retryPendingWebhooks } = require('./services/webhookRetryService');
+const securityMiddleware = require('./middleware/security');
 
 const PORT = process.env.PORT || 3001;
+
+process.on('uncaughtException', error => {
+  console.error('🛡️ UNCAUGHT EXCEPTION (Server continues):', error.message);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🛡️ UNHANDLED REJECTION (Server continues):', reason?.message || reason);
+});
 
 app.use(cors());
 app.use(express.json());
@@ -30,15 +39,20 @@ app.use(cookieParser());
 //Last in list
 app.use(errorHandler);
 
-setInterval(async () => {
-  try {
-    console.log('🔄 [Cron] Running scheduled webhook retry...'.yellow);
-    await retryPendingWebhooks();
-    console.log('✅ [Cron] Webhook retry completed'.green);
-  } catch (error) {
-    console.error('❌ [Cron] Error in retry interval:'.red, error);
-  }
-}, 10 * 60 * 1000);
+app.use(securityMiddleware);
+
+setInterval(
+  async () => {
+    try {
+      console.log('🔄 [Cron] Running scheduled webhook retry...'.yellow);
+      await retryPendingWebhooks();
+      console.log('✅ [Cron] Webhook retry completed'.green);
+    } catch (error) {
+      console.error('❌ [Cron] Error in retry interval:'.red, error);
+    }
+  },
+  10 * 60 * 1000
+);
 
 const start = async () => {
   try {
