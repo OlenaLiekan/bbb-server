@@ -346,13 +346,15 @@ class UserController {
             mainAddress: true,
           },
         });
-        if (prevMainAddress.id !== updatedAddressId) {
-          let options = {
-            where: { id: prevMainAddress.id },
-          };
-          let props = {};
-          props = { ...props, mainAddress: false };
-          await UserAddress.update(props, options);
+        if (prevMainAddress) {
+          if (prevMainAddress.id !== updatedAddressId) {
+            let options = {
+              where: { id: prevMainAddress.id },
+            };
+            let props = {};
+            props = { ...props, mainAddress: false };
+            await UserAddress.update(props, options);
+          }
         }
       }
 
