@@ -37,6 +37,7 @@ class ProductController {
         compound,
         applying,
         kitImg,
+        kitSlide,
       } = req.body;
 
       const { img } = req.files ? req.files : '';
@@ -68,6 +69,10 @@ class ProductController {
         } else {
           const slideFile = await upload(slide.tempFilePath);
           slideName = slideFile.secure_url.split('/').pop();
+        }
+      } else if (kitSlide) {
+        if (kitSlide.length > 0) {
+          slideNames = kitSlide.map(kitSlide => kitSlide.slideImg);
         }
       }
 
@@ -138,6 +143,17 @@ class ProductController {
           ProductSlide.create({
             slideImg: slideName,
             productId: product.id,
+          });
+        }
+      }
+
+      if (kitSlide) {
+        if (kitSlide.length > 0) {
+          slideNames.forEach(slideName => {
+            ProductSlide.create({
+              slideImg: slideName,
+              productId: product.id,
+            });
           });
         }
       }
