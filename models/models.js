@@ -66,12 +66,44 @@ const OrderItem = sequelize.define('order_item', {
 const Kit = sequelize.define('kit', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, unique: true, allowNull: false },
+  variantsList: { type: DataTypes.STRING, allowNull: true },
   price: { type: DataTypes.NUMBER, allowNull: true },
   img: { type: DataTypes.STRING, allowNull: true },
   isLashes: { type: DataTypes.BOOLEAN, allowNull: false },
   discountPrice: { type: DataTypes.NUMBER, allowNull: true, defaultValue: 0 },
   isPromo: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   newProduct: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
+});
+
+const KitSlide = sequelize.define('kit_slide', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  slideImg: { type: DataTypes.STRING, allowNull: false },
+});
+
+const KitRelated = sequelize.define('kit_related', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  referenceCode: { type: DataTypes.STRING, allowNull: false },
+});
+
+const KitInfo = sequelize.define('kit_info', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  title: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.STRING, allowNull: false },
+});
+
+const KitText = sequelize.define('kit_text', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  text: { type: DataTypes.TEXT, allowNull: false },
+});
+
+const KitApplying = sequelize.define('kit_applying', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  text: { type: DataTypes.TEXT, allowNull: true },
+});
+
+const KitCompound = sequelize.define('kit_compound', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  text: { type: DataTypes.TEXT, allowNull: true },
 });
 
 const Product = sequelize.define('product', {
@@ -285,6 +317,24 @@ BasketProduct.belongsTo(Basket);
 Kit.hasMany(Product);
 Product.belongsTo(Kit);
 
+Kit.hasMany(KitRelated, { as: 'related' });
+KitRelated.belongsTo(Kit);
+
+Kit.hasMany(KitInfo, { as: 'info' });
+KitInfo.belongsTo(Kit);
+
+Kit.hasMany(KitSlide, { as: 'slide' });
+KitSlide.belongsTo(Kit);
+
+Kit.hasMany(KitText, { as: 'text' });
+KitText.belongsTo(Kit);
+
+Kit.hasMany(KitCompound, { as: 'compound' });
+KitCompound.belongsTo(Kit);
+
+Kit.hasMany(KitApplying, { as: 'applying' });
+KitApplying.belongsTo(Kit);
+
 Category.hasMany(Type);
 Type.belongsTo(Category);
 
@@ -358,18 +408,24 @@ module.exports = {
   Review,
   Reply,
   TypeBrand,
+  KitRelated,
+  KitInfo,
+  KitSlide,
+  KitText,
+  KitCompound,
+  KitApplying,
   ProductRelated,
   ProductInfo,
   ProductSlide,
-  Slide,
-  Logo,
   ProductText,
   ProductCompound,
   ProductApplying,
+  PromotionInfo,
+  Slide,
+  Logo,
   DeliveryPrice,
   PaymentDetails,
   Promocode,
-  PromotionInfo,
   Promotion,
   UserPromocode,
   PaymentInformation,
