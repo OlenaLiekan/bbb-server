@@ -431,11 +431,6 @@ class ProductController {
 
     if (kitId) {
       options.where = { ...options.where, kitId };
-    } else {
-      options.where = {
-        ...options.where,
-        kitId: { [Op.not]: null },
-      };
     }
 
     const products = await Product.findAndCountAll(options);
