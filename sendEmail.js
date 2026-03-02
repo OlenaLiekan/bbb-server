@@ -290,7 +290,7 @@ function formatOrderToHTML(
                     </span>
                   </div>`;
 
-      if (item.isLashes) {
+      if (item.isLashes && !item.kitId) {
         detailsHTML += `<span style="color: #666666; font-size: 12px; line-height: 1.4;">
         ${item.curlArr || ''}${item.curlArr && (item.thicknessArr || item.lengthArr) ? ' / ' : ''}
         ${item.thicknessArr ? item.thicknessArr + ' mm' : ''}${
@@ -331,8 +331,8 @@ function formatOrderToHTML(
               (promocodeBrandId > 0 ? item.brandId == promocodeBrandId : promocodeBrandId == 0)
                 ? promoLine
                 : item.prevPrice - item.price > 0
-                ? discountPriceLine
-                : ''
+                  ? discountPriceLine
+                  : ''
             }
           </td>
           <td width="32%" style="vertical-align: top; text-align: right;">
