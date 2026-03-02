@@ -381,7 +381,10 @@ class ProductController {
     let options = {
       limit,
       offset,
-      order: [[sort, order]],
+      order: [
+        ['available', 'DESC'],
+        [sort, order],
+      ],
       distinct: true,
       where: {},
       include: [
@@ -428,6 +431,11 @@ class ProductController {
 
     if (kitId) {
       options.where = { ...options.where, kitId };
+    } else {
+      options.where = {
+        ...options.where,
+        kitId: { [Op.not]: null },
+      };
     }
 
     const products = await Product.findAndCountAll(options);
