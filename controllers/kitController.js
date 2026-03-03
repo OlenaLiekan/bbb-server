@@ -320,6 +320,14 @@ class KitController {
     let options = {
       distinct: true,
       where: {},
+      include: [
+        { model: KitRelated, as: 'related' },
+        { model: KitInfo, as: 'info' },
+        { model: KitSlide, as: 'slide' },
+        { model: KitText, as: 'text' },
+        { model: KitApplying, as: 'applying' },
+        { model: KitCompound, as: 'compound' },
+      ],
     };
 
     if (name) {
@@ -336,6 +344,14 @@ class KitController {
       const { id } = req.params;
       const kit = await Kit.findOne({
         where: { id },
+        include: [
+          { model: KitRelated, as: 'related' },
+          { model: KitInfo, as: 'info' },
+          { model: KitSlide, as: 'slide' },
+          { model: KitText, as: 'text' },
+          { model: KitApplying, as: 'applying' },
+          { model: KitCompound, as: 'compound' },
+        ],
       });
       return res.json(kit);
     } catch (e) {
