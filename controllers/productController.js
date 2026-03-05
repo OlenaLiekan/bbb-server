@@ -436,23 +436,26 @@ class ProductController {
 
     if (uniqueByKitId) {
       const allProducts = await Product.findAll(options);
-      const productsWhithKit = allProducts.filter(product => product.kitId);
-      let uniqueProductsArr = [];
-      for (let i = 0; i < productsWhithKit.length; i++) {
-        const productWithKit = productsWhithKit[i];
+      const productsWithKit = allProducts.filter(product => product.kitId);
+      const uniqueProductsArr = [];
+
+      for (let i = 0; i < productsWithKit.length; i++) {
+        const productWithKit = productsWithKit[i];
+
         if (uniqueProductsArr.length === 0) {
-          products.push(productWithKit);
+          uniqueProductsArr.push(productWithKit);
         } else {
           const result = uniqueProductsArr.find(item => item.kitId === productWithKit.kitId);
           if (!result) {
-            products.push(productWithKit);
+            uniqueProductsArr.push(productWithKit);
           }
         }
       }
+
       if (uniqueProductsArr.length > 0) {
         products = {
           count: uniqueProductsArr.length,
-          rows: uniqueProductsArr.slice(offset, limit * page - 1),
+          rows: uniqueProductsArr.slice(offset, offset + limit), // Исправлено: стандартная пагинация
         };
       } else {
         products = await Product.findAndCountAll({ ...options, limit, offset });
