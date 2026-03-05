@@ -47,7 +47,7 @@ class SlideController {
 
   async getAll(req, res) {
     const slides = await Slide.findAll({
-      order: [['id', 'ASC']],
+      order: [['id', 'DESC']],
     });
     return res.json(slides);
   }
