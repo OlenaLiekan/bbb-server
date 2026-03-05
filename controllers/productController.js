@@ -459,8 +459,6 @@ class ProductController {
           count: uniqueProductsArr.length,
           rows: uniqueProductsArr.slice(offset, offset + limit),
         };
-      } else {
-        products = await Product.findAndCountAll({ ...options, limit, offset });
       }
     } else {
       products = await Product.findAndCountAll({ ...options, limit, offset });
