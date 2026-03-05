@@ -434,22 +434,29 @@ class ProductController {
 
     let products;
 
-    if (uniqueByKitId) {
+    if ((uniqueByKitId = true)) {
       const allProducts = await Product.findAll(options);
       const productsWhithKit = allProducts.filter(product => product.kitId);
       let uniqueProductsArr = [];
       for (let i = 0; i < productsWhithKit.length; i++) {
         const productWithKit = productsWhithKit[i];
-        if (uniqueProductsArr.length === 0) {
+        if (uniqueProductsArr.length == 0) {
           products.push(productWithKit);
         } else {
-          const result = uniqueProductsArr.find(item => item.kitId === productWithKit.kitId);
+          const result = uniqueProductsArr.find(item => item.kitId == productWithKit.kitId);
           if (!result) {
             products.push(productWithKit);
           }
         }
       }
-      products = uniqueProductsArr;
+      products = {
+        count: uniqueProductsArr?.length || 0,
+        rows:
+          uniqueProductsArr?.slice(
+            offset > 0 ? limit * page : 0,
+            offset > 0 ? limit * page - 1 : 23
+          ) || [],
+      };
     } else {
       products = await Product.findAndCountAll({ ...options, limit, offset });
     }
