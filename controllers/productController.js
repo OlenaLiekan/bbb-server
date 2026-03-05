@@ -365,7 +365,7 @@ class ProductController {
       brandId,
       typeId,
       limit = 24,
-      page = 1,
+      page,
       rating,
       name,
       price,
@@ -374,7 +374,9 @@ class ProductController {
       kitId,
       uniqueByKitId,
     } = req.query;
-    const offset = page * limit - limit;
+
+    const currentPage = Number(page) || 1;
+    const offset = (currentPage - 1) * limit;
 
     let sort = req.query.sort ? req.query.sort : 'rating';
     let order = req.query.order ? req.query.order : 'ASC';
