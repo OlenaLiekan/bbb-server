@@ -372,6 +372,7 @@ class ProductController {
       discountPrice,
       isPromo,
       kitId,
+      uniqueByKitId,
     } = req.query;
     const offset = page * limit - limit;
 
@@ -379,8 +380,6 @@ class ProductController {
     let order = req.query.order ? req.query.order : 'ASC';
 
     let options = {
-      limit,
-      offset,
       order: [
         ['available', 'DESC'],
         [sort, order],
@@ -433,7 +432,27 @@ class ProductController {
       options.where = { ...options.where, kitId };
     }
 
-    const products = await Product.findAndCountAll(options);
+    let products;
+
+    if (uniqueByKitId) {
+      const allProducts = await Product.findAll(options);
+      const productsWhithKit = allProducts.filter(product => product.kitId);
+      let uniqueProductsArr = [];
+      for (let i = 0; i < productsWhithKit.length; i++) {
+        const productWithKit = productsWhithKit[i];
+        if (uniqueProductsArr.length === 0) {
+          products.push(productWithKit);
+        } else {
+          const result = uniqueProductsArr.find(item => item.kitId === productWithKit.kitId);
+          if (!result) {
+            products.push(productWithKit);
+          }
+        }
+      }
+      products = uniqueProductsArr;
+    } else {
+      products = await Product.findAndCountAll({ ...options, limit, offset });
+    }
 
     products.sort = req.query.sort;
     return res.json(products);
