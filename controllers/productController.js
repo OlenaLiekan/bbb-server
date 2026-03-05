@@ -455,7 +455,7 @@ class ProductController {
       if (uniqueProductsArr.length > 0) {
         products = {
           count: uniqueProductsArr.length,
-          rows: uniqueProductsArr.slice(offset, offset + limit), // Исправлено: стандартная пагинация
+          rows: uniqueProductsArr.slice(offset, offset + limit),
         };
       } else {
         products = await Product.findAndCountAll({ ...options, limit, offset });
