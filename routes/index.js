@@ -21,6 +21,7 @@ const sendPromocodeRouter = require('./sendPromocodeRouter');
 const promocodeRouter = require('./promocodeRouter');
 const promotionRouter = require('./promotionRouter');
 const sibsRouter = require('./sibsRouter');
+const tickerRouter = require('./tickerRouter');
 
 router.use('/user', userRouter);
 router.use('/type', typeRouter);
@@ -35,6 +36,7 @@ router.use('/reply', replyRouter);
 router.use('/delivery', deliveryRouter);
 router.use('/payment', paymentRouter);
 router.use('/logo', logoRouter);
+router.use('/ticker', tickerRouter);
 router.use('/send-email', mailRouter);
 router.use('/reset-password', newPassRouter);
 router.use('/newMember', sendPromocodeRouter);

@@ -207,6 +207,11 @@ const Logo = sequelize.define('logo', {
   logoName: { type: DataTypes.STRING, allowNull: true },
 });
 
+const Ticker = sequelize.define('ticker', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  text: { type: DataTypes.STRING, allowNull: false },
+});
+
 const DeliveryPrice = sequelize.define('delivery', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   price: { type: DataTypes.STRING, allowNull: false },
@@ -430,4 +435,5 @@ module.exports = {
   UserPromocode,
   PaymentInformation,
   PendingWebhook,
+  Ticker,
 };
