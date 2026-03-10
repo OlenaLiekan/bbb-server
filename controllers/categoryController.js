@@ -22,11 +22,14 @@ class CategoryController {
   async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { position } = req.body;
+      const { position, name } = req.body;
       const options = { where: { id: id } };
       let props = {};
       if (position) {
         props = { ...props, position };
+      }
+      if (name) {
+        props = { ...props, name };
       }
       const category = await Category.update(props, options);
       return res.json(category);
