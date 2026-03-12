@@ -439,7 +439,10 @@ class ProductController {
     if (uniqueByKitId) {
       const priceSortOptions = {
         ...options,
-        order: [['price', 'ASC']],
+        order: [
+          ['available', 'DESC'],
+          ['price', 'ASC'],
+        ],
       };
       const allProducts = await Product.findAll(priceSortOptions);
       const productsWithKit = allProducts.filter(product => product.kitId);
