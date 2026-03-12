@@ -447,9 +447,24 @@ class ProductController {
         if (uniqueProductsArr.length === 0) {
           uniqueProductsArr.push(productWithKit);
         } else {
-          const result = uniqueProductsArr.find(item => item.kitId === productWithKit.kitId);
-          if (!result) {
+          const existingProduct = uniqueProductsArr.find(
+            item => item.kitId === productWithKit.kitId
+          );
+          if (!existingProduct) {
             uniqueProductsArr.push(productWithKit);
+          } else {
+            const existingPrice = existingProduct.discountPrice || existingProduct.price;
+            const newPrice = productWithKit.discountPrice || productWithKit.price;
+
+            if (productWithKit.available && !existingProduct.available) {
+              const index = uniqueProductsArr.indexOf(existingProduct);
+              uniqueProductsArr[index] = productWithKit;
+            } else if (productWithKit.available === existingProduct.available) {
+              if (newPrice < existingPrice) {
+                const index = uniqueProductsArr.indexOf(existingProduct);
+                uniqueProductsArr[index] = productWithKit;
+              }
+            }
           }
         }
       }
