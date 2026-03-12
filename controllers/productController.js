@@ -437,7 +437,11 @@ class ProductController {
     let products;
 
     if (uniqueByKitId) {
-      const allProducts = await Product.findAll(options);
+      const priceSortOptions = {
+        ...options,
+        order: [['price', 'ASC']],
+      };
+      const allProducts = await Product.findAll(priceSortOptions);
       const productsWithKit = allProducts.filter(product => product.kitId);
       const uniqueProductsArr = [];
 
@@ -452,23 +456,9 @@ class ProductController {
           );
           if (!existingProduct) {
             uniqueProductsArr.push(productWithKit);
-          } else {
-            const existingPrice = existingProduct.discountPrice || existingProduct.price;
-            const newPrice = productWithKit.discountPrice || productWithKit.price;
-
-            if (productWithKit.available && !existingProduct.available) {
-              const index = uniqueProductsArr.indexOf(existingProduct);
-              uniqueProductsArr[index] = productWithKit;
-            } else if (productWithKit.available === existingProduct.available) {
-              if (newPrice < existingPrice) {
-                const index = uniqueProductsArr.indexOf(existingProduct);
-                uniqueProductsArr[index] = productWithKit;
-              }
-            }
           }
         }
       }
-
       if (uniqueProductsArr.length > 0) {
         products = {
           count: uniqueProductsArr.length,
