@@ -458,19 +458,20 @@ class ProductController {
     if (uniqueByKitId) {
       const allProducts = await Product.findAll(options);
       const productsWithKit = allProducts.filter(product => product.kitId);
+      const sortedByPrice = productsWithKit.sort((a, b) => a.price - b.price);
       const uniqueProductsArr = [];
 
-      for (let i = 0; i < productsWithKit.length; i++) {
-        const productWithKit = productsWithKit[i];
+      for (let i = 0; i < sortedByPrice.length; i++) {
+        const sortedByPrice = sortedByPrice[i];
 
         if (uniqueProductsArr.length === 0) {
-          uniqueProductsArr.push(productWithKit);
+          uniqueProductsArr.push(sortedByPrice);
         } else {
           const existingProduct = uniqueProductsArr.find(
-            item => item.kitId === productWithKit.kitId
+            item => item.kitId === sortedByPrice.kitId
           );
           if (!existingProduct) {
-            uniqueProductsArr.push(productWithKit);
+            uniqueProductsArr.push(sortedByPrice);
           }
         }
       }
