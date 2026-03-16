@@ -457,8 +457,9 @@ class ProductController {
 
     if (uniqueByKitId) {
       const allProducts = await Product.findAll(options);
-      const productsWithKit = allProducts.filter(product => product.kitId);
-      const sortedByPrice = productsWithKit.sort((a, b) => a.price - b.price);
+      const productsWithKit = allProducts
+        .filter(product => product.kitId)
+        .sort((a, b) => a.price - b.price);
       const uniqueProductsArr = [];
 
       for (let i = 0; i < productsWithKit.length; i++) {
