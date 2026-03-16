@@ -461,17 +461,17 @@ class ProductController {
       const sortedByPrice = productsWithKit.sort((a, b) => a.price - b.price);
       const uniqueProductsArr = [];
 
-      for (let i = 0; i < sortedByPrice.length; i++) {
-        const sortedByPrice = sortedByPrice[i];
+      for (let i = 0; i < productsWithKit.length; i++) {
+        const productWithKit = productsWithKit[i];
 
         if (uniqueProductsArr.length === 0) {
-          uniqueProductsArr.push(sortedByPrice);
+          uniqueProductsArr.push(productWithKit);
         } else {
           const existingProduct = uniqueProductsArr.find(
-            item => item.kitId === sortedByPrice.kitId
+            item => item.kitId === productWithKit.kitId
           );
           if (!existingProduct) {
-            uniqueProductsArr.push(sortedByPrice);
+            uniqueProductsArr.push(productWithKit);
           }
         }
       }
