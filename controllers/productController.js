@@ -367,11 +367,12 @@ class ProductController {
     }
 
     if (kitSlide) {
+      const productId = req.params.id;
       if (kitSlide.length > 0) {
         slideNames.forEach(slideName => {
           ProductSlide.create({
             slideImg: slideName,
-            productId: product.id,
+            productId: productId,
           });
         });
       }
