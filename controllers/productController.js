@@ -71,6 +71,7 @@ class ProductController {
           slideName = slideFile.secure_url.split('/').pop();
         }
       } else if (kitSlide) {
+        kitSlide = JSON.parse(kitSlide);
         if (kitSlide.length > 0) {
           slideNames = kitSlide.map(kitSlide => kitSlide.slideImg);
         }
@@ -228,6 +229,7 @@ class ProductController {
         slideName = slideFile.secure_url.split('/').pop();
       }
     } else if (kitSlide) {
+      kitSlide = JSON.parse(kitSlide);
       if (kitSlide.length > 0) {
         slideNames = kitSlide.map(kitSlide => kitSlide.slideImg);
       }
