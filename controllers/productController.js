@@ -238,7 +238,7 @@ class ProductController {
     const options = { where: { id: id } };
     let props = {};
 
-    if (img) {
+    if (img || kitImg) {
       props = { ...props, img: fileName };
     }
     if (name) {
