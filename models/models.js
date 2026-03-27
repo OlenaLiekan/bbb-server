@@ -327,10 +327,10 @@ Rating.belongsTo(User);
 User.hasMany(Review);
 Review.belongsTo(User);
 
-Basket.hasMany(BasketProduct);
+Basket.hasMany(BasketProduct, { as: 'product' });
 BasketProduct.belongsTo(Basket);
 
-Favorite.hasMany(FavoriteProduct);
+Favorite.hasMany(FavoriteProduct, { as: 'product' });
 FavoriteProduct.belongsTo(Favorite);
 
 Kit.hasMany(Product);
