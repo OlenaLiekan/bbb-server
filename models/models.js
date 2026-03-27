@@ -19,6 +19,14 @@ const BasketProduct = sequelize.define('basket_product', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 });
 
+const Favorite = sequelize.define('favorite', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
+const FavoriteProduct = sequelize.define('favorite_product', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
 const UserOrder = sequelize.define('user_order', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   quantity: { type: DataTypes.INTEGER, allowNull: false },
@@ -298,6 +306,9 @@ const PendingWebhook = sequelize.define(
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
+User.hasOne(Favorite);
+Favorite.belongsTo(User);
+
 User.hasMany(UserOrder, { as: 'order' });
 UserOrder.belongsTo(User);
 
@@ -318,6 +329,9 @@ Review.belongsTo(User);
 
 Basket.hasMany(BasketProduct);
 BasketProduct.belongsTo(Basket);
+
+Favorite.hasMany(FavoriteProduct);
+FavoriteProduct.belongsTo(Favorite);
 
 Kit.hasMany(Product);
 Product.belongsTo(Kit);
@@ -404,6 +418,8 @@ module.exports = {
   OrderItem,
   Basket,
   BasketProduct,
+  Favorite,
+  FavoriteProduct,
   Kit,
   Product,
   Category,

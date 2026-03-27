@@ -5,10 +5,13 @@ const jwt = require('jsonwebtoken');
 const {
   User,
   Basket,
+  BasketProduct,
   UserOrder,
   OrderItem,
   UserAddress,
   UserPromocode,
+  Favorite,
+  FavoriteProduct,
   PaymentInformation,
 } = require('../models/models');
 
@@ -38,6 +41,7 @@ class UserController {
       phone,
     });
     const basket = await Basket.create({ userId: user.id });
+    const favorite = await Favorite.create({ userId: user.id });
     const token = generateJwt(user.id, user.email, user.role);
     return res.json({ token });
   }
@@ -50,6 +54,17 @@ class UserController {
 
       if (!user) {
         return next(ApiError.internal('User not found'));
+      }
+
+      if (user) {
+        if (user.favorite === undefined || !user.favorite) {
+          try {
+            await Favorite.create({ userId: user.id });
+            console.log('The favorite product model was created for the user: ', user.id);
+          } catch (err) {
+            console.log(err, ' | The favorite product model has not been created for the user.');
+          }
+        }
       }
 
       let comparePassword = bcrypt.compareSync(password, user.password);
@@ -122,6 +137,16 @@ class UserController {
           {
             model: UserAddress,
             as: 'address',
+          },
+          {
+            model: Favorite,
+            as: 'favorite',
+            include: [{ model: FavoriteProduct, as: 'product' }],
+          },
+          {
+            model: Basket,
+            as: 'basket',
+            include: [{ model: BasketProduct, as: 'product' }],
           },
         ],
       };
