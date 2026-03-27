@@ -57,7 +57,8 @@ class UserController {
       }
 
       if (user) {
-        if (user.favorite === undefined || !user.favorite) {
+        const userFavorite = await Favorite.findOne({ where: { userId: user.id } });
+        if (!userFavorite) {
           try {
             await Favorite.create({ userId: user.id });
             console.log('The favorite product model was created for the user: ', user.id);
