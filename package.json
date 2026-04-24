@@ -10,8 +10,8 @@
   "keywords": [],
   "author": "Olena Liekan <olena.liekan@gmail.com>",
   "license": "ISC",
-    "engines": {
-    "node": "18.x",
+  "engines": {
+    "node": "20.x",
     "npm": ">=8.0.0",
     "yarn": ">=1.22.0"
   },
